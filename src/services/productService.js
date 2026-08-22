@@ -1,3 +1,5 @@
+import { getProductStatus } from "../utils/productUtils";
+
 const PRODUCTS_KEY = "warehouse_products";
 
 export const getProducts = () => {
@@ -27,21 +29,26 @@ const saveProducts = (products) => {
   );
 };
 
-export const createProduct = (productData) => {
+export const createProduct = (
+  productData
+) => {
   const products = getProducts();
+
+  const quantity = Number(
+    productData.quantity || 0
+  );
 
   const newProduct = {
     ...productData,
     id: crypto.randomUUID(),
-    quantity: Number(
-      productData.quantity || 0
-    ),
+    quantity,
     costPrice: Number(
       productData.costPrice || 0
     ),
     sellingPrice: Number(
       productData.sellingPrice || 0
     ),
+    status: getProductStatus(quantity),
   };
 
   const updatedProducts = [
@@ -60,38 +67,45 @@ export const updateProduct = (
 ) => {
   const products = getProducts();
 
+  const quantity = Number(
+    productData.quantity || 0
+  );
+
   const updatedProduct = {
     ...productData,
     id: productId,
-    quantity: Number(
-      productData.quantity || 0
-    ),
+    quantity,
     costPrice: Number(
       productData.costPrice || 0
     ),
     sellingPrice: Number(
       productData.sellingPrice || 0
     ),
+    status: getProductStatus(quantity),
   };
 
-  const updatedProducts = products.map(
-    (product) =>
+  const updatedProducts =
+    products.map((product) =>
       product.id === productId
         ? updatedProduct
         : product
-  );
+    );
 
   saveProducts(updatedProducts);
 
   return updatedProduct;
 };
 
-export const deleteProduct = (productId) => {
+export const deleteProduct = (
+  productId
+) => {
   const products = getProducts();
 
-  const updatedProducts = products.filter(
-    (product) => product.id !== productId
-  );
+  const updatedProducts =
+    products.filter(
+      (product) =>
+        product.id !== productId
+    );
 
   saveProducts(updatedProducts);
 
