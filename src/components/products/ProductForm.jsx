@@ -82,7 +82,6 @@ const ProductForm = ({
           placeholder="Enter product name"
           required
         />
-
         <Input
           label="SKU"
           name="sku"
@@ -91,7 +90,6 @@ const ProductForm = ({
           placeholder="Enter SKU"
           required
         />
-
         <Input
           label="Barcode"
           name="barcode"
@@ -99,13 +97,16 @@ const ProductForm = ({
           onChange={handleChange}
           placeholder="Enter barcode"
         />
-
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="category"
+            className="mb-1.5 block text-sm font-medium text-gray-700"
+          >
             Category
           </label>
 
           <select
+            id="category"
             name="category"
             value={formData.category}
             onChange={handleChange}
@@ -121,7 +122,6 @@ const ProductForm = ({
             ))}
           </select>
         </div>
-
         <div>
           <label
             htmlFor="supplierId"
@@ -136,7 +136,7 @@ const ProductForm = ({
             value={formData.supplierId}
             onChange={handleChange}
             required
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#FF9900] focus:ring-2 focus:ring-[#FF9900]/20"
+            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-[#FF9900] focus:ring-2 focus:ring-[#FF9900]/20"
           >
             <option value="">Select Supplier</option>
 
@@ -155,9 +155,9 @@ const ProductForm = ({
           value={formData.costPrice}
           onChange={handleChange}
           placeholder="Enter cost price"
+          min="0"
           required
         />
-
         <Input
           label="Selling Price"
           name="sellingPrice"
@@ -165,9 +165,9 @@ const ProductForm = ({
           value={formData.sellingPrice}
           onChange={handleChange}
           placeholder="Enter selling price"
+          min="0"
           required
         />
-
         <Input
           label="Quantity"
           name="quantity"
@@ -178,7 +178,6 @@ const ProductForm = ({
           min="0"
           required
         />
-
         <Input
           label="Date"
           name="date"
@@ -190,11 +189,7 @@ const ProductForm = ({
       </div>
 
       <div className="flex flex-col-reverse gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:justify-end">
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={onCancel}
-        >
+        <Button type="button" variant="secondary" onClick={onCancel}>
           Cancel
         </Button>
 
