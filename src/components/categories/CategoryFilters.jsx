@@ -1,29 +1,25 @@
-import { FiSearch, FiX } from "react-icons/fi";
-import { useCategoryContext } from "../../context/CategoryContext";
+import {
+  FiSearch,
+  FiX,
+} from "react-icons/fi";
 
-const ProductFilters = ({
+const CategoryFilters = ({
   searchTerm,
-  category,
   status,
   onSearchChange,
-  onCategoryChange,
   onStatusChange,
   onClearFilters,
   hasActiveFilters,
 }) => {
-  const { categories } = useCategoryContext();
-
-  const statuses = ["In Stock", "Low Stock", "Out of Stock"];
-
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
         <div className="flex-1">
           <label
-            htmlFor="product-search"
+            htmlFor="category-search"
             className="mb-1.5 block text-sm font-medium text-gray-700"
           >
-            Search Products
+            Search Categories
           </label>
 
           <div className="relative">
@@ -33,11 +29,15 @@ const ProductFilters = ({
             />
 
             <input
-              id="product-search"
+              id="category-search"
               type="text"
               value={searchTerm}
-              onChange={(event) => onSearchChange(event.target.value)}
-              placeholder="Search by name, SKU or barcode..."
+              onChange={(event) =>
+                onSearchChange(
+                  event.target.value
+                )
+              }
+              placeholder="Search by category name or description..."
               className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm outline-none transition placeholder:text-gray-400 focus:border-[#FF9900] focus:ring-2 focus:ring-[#FF9900]/20"
             />
           </div>
@@ -45,49 +45,33 @@ const ProductFilters = ({
 
         <div className="w-full lg:w-52">
           <label
-            htmlFor="category-filter"
-            className="mb-1.5 block text-sm font-medium text-gray-700"
-          >
-            Category
-          </label>
-
-          <select
-            id="category-filter"
-            value={category}
-            onChange={(event) => onCategoryChange(event.target.value)}
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-700 outline-none transition focus:border-[#FF9900] focus:ring-2 focus:ring-[#FF9900]/20"
-          >
-            <option value="">All Categories</option>
-
-            {categories.map((category) => (
-              <option key={category.id} value={category.name}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="w-full lg:w-52">
-          <label
-            htmlFor="status-filter"
+            htmlFor="category-status"
             className="mb-1.5 block text-sm font-medium text-gray-700"
           >
             Status
           </label>
 
           <select
-            id="status-filter"
+            id="category-status"
             value={status}
-            onChange={(event) => onStatusChange(event.target.value)}
+            onChange={(event) =>
+              onStatusChange(
+                event.target.value
+              )
+            }
             className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-700 outline-none transition focus:border-[#FF9900] focus:ring-2 focus:ring-[#FF9900]/20"
           >
-            <option value="">All Statuses</option>
+            <option value="">
+              All Statuses
+            </option>
 
-            {statuses.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
+            <option value="Active">
+              Active
+            </option>
+
+            <option value="Inactive">
+              Inactive
+            </option>
           </select>
         </div>
 
@@ -106,4 +90,4 @@ const ProductFilters = ({
   );
 };
 
-export default ProductFilters;
+export default CategoryFilters;
