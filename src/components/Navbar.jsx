@@ -1,10 +1,29 @@
-import { FiMenu, FiBell, FiUser, FiChevronDown } from "react-icons/fi";
+import {
+  FiMenu,
+  FiBell,
+  FiUser,
+  FiChevronDown,
+  FiLogOut,
+} from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = ({ onMenuClick }) => {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+
+    navigate("/", {
+      replace: true,
+    });
+  };
+
   return (
     <header className="sticky top-0 z-40 h-16 border-b border-gray-200 bg-[#131921] text-white">
       <div className="flex h-full items-center justify-between px-4 sm:px-6">
-        
+
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -33,7 +52,7 @@ const Navbar = ({ onMenuClick }) => {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          
+
           <button
             type="button"
             className="relative rounded-lg p-2 text-gray-300 transition hover:bg-white/10 hover:text-white"
@@ -45,29 +64,42 @@ const Navbar = ({ onMenuClick }) => {
           </button>
 
           <div className="hidden h-8 w-px bg-white/10 sm:block" />
+          <div className="relative">
+            <button
+              type="button"
+              className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition hover:bg-white/10"
+            >
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-700">
+                <FiUser size={18} />
+              </div>
+
+              <div className="hidden text-left md:block">
+                <p className="text-sm font-medium">
+                  {user?.name || "Admin"}
+                </p>
+
+                <p className="text-xs text-gray-400">
+                  {user?.email || "Administrator"}
+                </p>
+              </div>
+
+              <FiChevronDown
+                size={16}
+                className="hidden text-gray-400 md:block"
+              />
+            </button>
+          </div>
 
           <button
             type="button"
-            className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition hover:bg-white/10"
+            onClick={handleLogout}
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-300 transition hover:bg-red-500/10 hover:text-red-400"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-700">
-              <FiUser size={18} />
-            </div>
+            <FiLogOut size={18} />
 
-            <div className="hidden text-left md:block">
-              <p className="text-sm font-medium">
-                Admin
-              </p>
-
-              <p className="text-xs text-gray-400">
-                Administrator
-              </p>
-            </div>
-
-            <FiChevronDown
-              size={16}
-              className="hidden text-gray-400 md:block"
-            />
+            <span className="hidden sm:inline">
+              Logout
+            </span>
           </button>
         </div>
       </div>

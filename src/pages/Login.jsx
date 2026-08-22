@@ -1,109 +1,108 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { FiAlertCircle } from "react-icons/fi";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
 import Input from "../components/Input";
 import Button from "../components/Button";
 
-const Login = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    rememberMe: false,
-  });
+import { useAuth } from "../context/AuthContext";
 
-  const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+const Login = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const { login } = useAuth();
+
+  const [formData, setFormData] =
+    useState({
+      email: "",
+      password: "",
+    });
+
+  const [error, setError] =
+    useState("");
+
+  const [isSubmitting, setIsSubmitting] =
+    useState(false);
+
+  const successMessage =
+    location.state?.message;
 
   const handleChange = (event) => {
-    const { name, value, checked, type } = event.target;
+    const { name, value } =
+      event.target;
 
-    setFormData((previousData) => ({
-      ...previousData,
-      [name]: type === "checkbox" ? checked : value,
+    setFormData((previous) => ({
+      ...previous,
+      [name]: value,
     }));
 
-    if (errors[name]) {
-      setErrors((previousErrors) => ({
-        ...previousErrors,
-        [name]: "",
-      }));
+    if (error) {
+      setError("");
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email address is required.";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required.";
-    }
-
-    return newErrors;
-  };
-
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (
+    event
+  ) => {
     event.preventDefault();
 
-    const validationErrors = validateForm();
-
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
+    setError("");
 
     try {
-      setIsLoading(true);
+      setIsSubmitting(true);
 
-      console.log("Login data:", formData);
+      await login(formData);
 
-      await new Promise((resolve) =>
-        setTimeout(resolve, 800)
-      );
-    } catch (error) {
-      console.error("Login failed:", error);
+      navigate("/dashboard", {
+        replace: true,
+      });
+    } catch (loginError) {
+      setError(loginError.message);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-gray-900">
           Welcome back
         </h2>
 
-        <p className="mt-2 text-sm leading-6 text-gray-500">
-          Sign in to access your warehouse dashboard.
+        <p className="mt-1 text-sm text-gray-500">
+          Sign in to manage your warehouse.
         </p>
       </div>
 
-      {errors.general && (
-        <div className="mb-5 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
-          <FiAlertCircle className="mt-0.5 shrink-0" size={17} />
-          <span>{errors.general}</span>
+      {successMessage && (
+        <div className="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-600">
+          {successMessage}
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          {error}
         </div>
       )}
 
       <form
         onSubmit={handleSubmit}
-        noValidate
-        className="space-y-5"
+        className="space-y-4"
       >
         <Input
-          label="Email Address"
+          label="Email"
           name="email"
           type="email"
           value={formData.email}
           onChange={handleChange}
           placeholder="Enter your email"
           required
-          error={errors.email}
-          disabled={isLoading}
         />
 
         <Input
@@ -114,57 +113,28 @@ const Login = () => {
           onChange={handleChange}
           placeholder="Enter your password"
           required
-          error={errors.password}
-          disabled={isLoading}
         />
-
-        <div className="flex items-center justify-between gap-4">
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              name="rememberMe"
-              checked={formData.rememberMe}
-              onChange={handleChange}
-              disabled={isLoading}
-              className="h-4 w-4 rounded border-gray-300 text-[#FF9900] accent-[#FF9900] focus:ring-[#FF9900]"
-            />
-
-            <span className="text-sm text-gray-600">
-              Remember me
-            </span>
-          </label>
-
-          <button
-            type="button"
-            disabled={isLoading}
-            className="text-sm font-medium text-[#E47911] transition hover:text-[#C45F00] disabled:opacity-50"
-          >
-            Forgot password?
-          </button>
-        </div>
 
         <Button
           type="submit"
-          loading={isLoading}
-          disabled={isLoading}
+          disabled={isSubmitting}
           className="w-full"
-          size="lg"
         >
-          Sign In
+          {isSubmitting
+            ? "Signing In..."
+            : "Sign In"}
         </Button>
       </form>
 
-      <div className="mt-8 border-t border-gray-200 pt-6 text-center">
-        <p className="text-sm text-gray-500">
-          Don't have an account?{" "}
-          <Link
-            to="/signup"
-            className="font-semibold text-[#E47911] transition hover:text-[#C45F00]"
-          >
-            Create an account
-          </Link>
-        </p>
-      </div>
+      <p className="mt-6 text-center text-sm text-gray-500">
+        Don't have an account?{" "}
+        <Link
+          to="/signup"
+          className="font-semibold text-[#e88a00] hover:underline"
+        >
+          Create Account
+        </Link>
+      </p>
     </div>
   );
 };
