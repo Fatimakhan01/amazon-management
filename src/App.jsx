@@ -19,34 +19,37 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import { ProductProvider } from "./context/ProductContext";
 import { CategoryProvider } from "./context/CategoryContext";
+import { SupplierProvider } from "./context/SupplierContext";
 
 function App() {
   return (
     <AuthProvider>
       <CategoryProvider>
-        <ProductProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
+        <SupplierProvider>
+          <ProductProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
 
-              <Route element={<ProtectedRoute />}>
-                <Route element={<DashboardLayout />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/products" element={<Products />} />
-                  <Route path="/categories" element={<Categories />} />
-                  <Route path="/suppliers" element={<Suppliers />} />
-                  <Route path="/stock-in" element={<StockIn />} />
-                  <Route path="/stock-out" element={<StockOut />} />
-                  <Route path="/orders" element={<Orders />} />
-                  <Route path="/wastage" element={<Wastage />} />
-                  <Route path="/reports" element={<Reports />} />
-                  <Route path="/settings" element={<Settings />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<DashboardLayout />}>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/products" element={<Products />} />
+                    <Route path="/categories" element={<Categories />} />
+                    <Route path="/suppliers" element={<Suppliers />} />
+                    <Route path="/stock-in" element={<StockIn />} />
+                    <Route path="/stock-out" element={<StockOut />} />
+                    <Route path="/orders" element={<Orders />} />
+                    <Route path="/wastage" element={<Wastage />} />
+                    <Route path="/reports" element={<Reports />} />
+                    <Route path="/settings" element={<Settings />} />
+                  </Route>
                 </Route>
-              </Route>
-            </Routes>
-          </BrowserRouter>
-        </ProductProvider>
+              </Routes>
+            </BrowserRouter>
+          </ProductProvider>
+        </SupplierProvider>
       </CategoryProvider>
     </AuthProvider>
   );

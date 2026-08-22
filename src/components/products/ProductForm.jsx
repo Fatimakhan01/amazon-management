@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import Button from "../Button";
 import Input from "../Input";
 import { useCategoryContext } from "../../context/CategoryContext";
+import { useSupplierContext } from "../../context/SupplierContext";
 
 const defaultValues = {
   name: "",
   sku: "",
   barcode: "",
   category: "",
-  supplier: "",
+  supplierId: "",
   costPrice: "",
   sellingPrice: "",
   quantity: "",
@@ -24,6 +25,8 @@ const ProductForm = ({
   isEditing = false,
 }) => {
   const { categories } = useCategoryContext();
+  const { suppliers } = useSupplierContext();
+
   const [formData, setFormData] = useState(defaultValues);
 
   useEffect(() => {
@@ -119,14 +122,31 @@ const ProductForm = ({
           </select>
         </div>
 
-        <Input
-          label="Supplier"
-          name="supplier"
-          value={formData.supplier}
-          onChange={handleChange}
-          placeholder="Enter supplier"
-          required
-        />
+        <div>
+          <label
+            htmlFor="supplierId"
+            className="mb-1.5 block text-sm font-medium text-gray-700"
+          >
+            Supplier
+          </label>
+
+          <select
+            id="supplierId"
+            name="supplierId"
+            value={formData.supplierId}
+            onChange={handleChange}
+            required
+            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#FF9900] focus:ring-2 focus:ring-[#FF9900]/20"
+          >
+            <option value="">Select Supplier</option>
+
+            {suppliers.map((supplier) => (
+              <option key={supplier.id} value={supplier.id}>
+                {supplier.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <Input
           label="Cost Price"
@@ -170,7 +190,11 @@ const ProductForm = ({
       </div>
 
       <div className="flex flex-col-reverse gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:justify-end">
-        <Button type="button" variant="secondary" onClick={onCancel}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onCancel}
+        >
           Cancel
         </Button>
 
