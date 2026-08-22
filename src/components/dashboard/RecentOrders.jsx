@@ -1,6 +1,6 @@
 import React from 'react'
 
-const WarehouseContext = () => {
+const RecentOrders = () => {
   return (
     <div>
       
@@ -8,4 +8,4 @@ const WarehouseContext = () => {
   )
 }
 
-export default WarehouseContext
+export default RecentOrders
