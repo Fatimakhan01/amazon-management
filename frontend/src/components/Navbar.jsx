@@ -7,6 +7,7 @@ import {
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import ThemeToggle from "./ThemeToggle";
 
 const Navbar = ({ onMenuClick }) => {
   const navigate = useNavigate();
@@ -89,7 +90,7 @@ const Navbar = ({ onMenuClick }) => {
               />
             </button>
           </div>
-
+<ThemeToggle />
           <button
             type="button"
             onClick={handleLogout}
