@@ -1,87 +1,75 @@
-const SUPPLIERS_KEY = "warehouse_suppliers";
+const API_URL = import.meta.env.VITE_API_URL;
 
-export const getSuppliers = () => {
-  const storedSuppliers =
-    localStorage.getItem(SUPPLIERS_KEY);
+const handleResponse = async (response) => {
+  const data = await response.json();
 
-  if (!storedSuppliers) {
-    return [];
-  }
-
-  try {
-    return JSON.parse(storedSuppliers);
-  } catch (error) {
-    console.error(
-      "Failed to parse suppliers:",
-      error
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Something went wrong.",
     );
-
-    return [];
   }
+
+  return data;
 };
 
-const saveSuppliers = (suppliers) => {
-  localStorage.setItem(
-    SUPPLIERS_KEY,
-    JSON.stringify(suppliers)
+export const getSuppliers = async () => {
+  const response = await fetch(
+    `${API_URL}/suppliers`,
   );
+
+  const data = await handleResponse(response);
+
+  return data.suppliers;
 };
 
-export const createSupplier = (
-  supplierData
+export const createSupplier = async (
+  supplierData,
 ) => {
-  const suppliers = getSuppliers();
+  const response = await fetch(
+    `${API_URL}/suppliers`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(supplierData),
+    },
+  );
 
-  const newSupplier = {
-    ...supplierData,
-    id: crypto.randomUUID(),
-  };
+  const data = await handleResponse(response);
 
-  const updatedSuppliers = [
-    ...suppliers,
-    newSupplier,
-  ];
-
-  saveSuppliers(updatedSuppliers);
-
-  return newSupplier;
+  return data.supplier;
 };
 
-export const updateSupplier = (
+export const updateSupplier = async (
   supplierId,
-  supplierData
+  supplierData,
 ) => {
-  const suppliers = getSuppliers();
+  const response = await fetch(
+    `${API_URL}/suppliers/${supplierId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(supplierData),
+    },
+  );
 
-  const updatedSupplier = {
-    ...supplierData,
-    id: supplierId,
-  };
+  const data = await handleResponse(response);
 
-  const updatedSuppliers =
-    suppliers.map((supplier) =>
-      supplier.id === supplierId
-        ? updatedSupplier
-        : supplier
-    );
-
-  saveSuppliers(updatedSuppliers);
-
-  return updatedSupplier;
+  return data.supplier;
 };
 
-export const deleteSupplier = (
-  supplierId
+export const deleteSupplier = async (
+  supplierId,
 ) => {
-  const suppliers = getSuppliers();
+  const response = await fetch(
+    `${API_URL}/suppliers/${supplierId}`,
+    {
+      method: "DELETE",
+    },
+  );
 
-  const updatedSuppliers =
-    suppliers.filter(
-      (supplier) =>
-        supplier.id !== supplierId
-    );
-
-  saveSuppliers(updatedSuppliers);
-
-  return updatedSuppliers;
+  return handleResponse(response);
 };

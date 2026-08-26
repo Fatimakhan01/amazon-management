@@ -12,8 +12,7 @@ import {
   deleteSupplier,
 } from "../services/supplierService";
 
-const SupplierContext =
-  createContext(null);
+const SupplierContext = createContext(null);
 
 export const SupplierProvider = ({
   children,
@@ -24,63 +23,127 @@ export const SupplierProvider = ({
   const [loading, setLoading] =
     useState(true);
 
-  useEffect(() => {
-    const storedSuppliers =
-      getSuppliers();
+  const [error, setError] =
+    useState("");
 
-    setSuppliers(storedSuppliers);
-    setLoading(false);
+  useEffect(() => {
+    const loadSuppliers = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const data =
+          await getSuppliers();
+
+        setSuppliers(data);
+      } catch (error) {
+        setError(
+          error.message ||
+            "Failed to load suppliers.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSuppliers();
   }, []);
 
-  const addSupplier = (
-    supplierData
+  const addSupplier = async (
+    supplierData,
   ) => {
-    const newSupplier =
-      createSupplier(supplierData);
+    try {
+      setError("");
 
-    setSuppliers((previousSuppliers) => [
-      ...previousSuppliers,
-      newSupplier,
-    ]);
-  };
+      const newSupplier =
+        await createSupplier(
+          supplierData,
+        );
 
-  const editSupplier = (
-    supplierId,
-    supplierData
-  ) => {
-    const updatedSupplier =
-      updateSupplier(
-        supplierId,
-        supplierData
+      setSuppliers(
+        (previousSuppliers) => [
+          newSupplier,
+          ...previousSuppliers,
+        ],
       );
 
-    setSuppliers((previousSuppliers) =>
-      previousSuppliers.map((supplier) =>
-        supplier.id === supplierId
-          ? updatedSupplier
-          : supplier
-      )
-    );
+      return newSupplier;
+    } catch (error) {
+      setError(error.message);
+
+      throw error;
+    }
   };
 
-  const removeSupplier = (
-    supplierId
+  const editSupplier = async (
+    supplierId,
+    supplierData,
   ) => {
-    const updatedSuppliers =
-      deleteSupplier(supplierId);
+    try {
+      setError("");
 
-    setSuppliers(updatedSuppliers);
+      const updatedSupplier =
+        await updateSupplier(
+          supplierId,
+          supplierData,
+        );
+
+      setSuppliers(
+        (previousSuppliers) =>
+          previousSuppliers.map(
+            (supplier) =>
+              supplier.id ===
+              supplierId
+                ? updatedSupplier
+                : supplier,
+          ),
+      );
+
+      return updatedSupplier;
+    } catch (error) {
+      setError(error.message);
+
+      throw error;
+    }
+  };
+
+  const removeSupplier = async (
+    supplierId,
+  ) => {
+    try {
+      setError("");
+
+      await deleteSupplier(
+        supplierId,
+      );
+
+      setSuppliers(
+        (previousSuppliers) =>
+          previousSuppliers.filter(
+            (supplier) =>
+              supplier.id !==
+              supplierId,
+          ),
+      );
+    } catch (error) {
+      setError(error.message);
+
+      throw error;
+    }
+  };
+
+  const value = {
+    suppliers,
+    loading,
+    error,
+    addSupplier,
+    editSupplier,
+    removeSupplier,
   };
 
   return (
     <SupplierContext.Provider
-      value={{
-        suppliers,
-        loading,
-        addSupplier,
-        editSupplier,
-        removeSupplier,
-      }}
+      value={value}
     >
       {children}
     </SupplierContext.Provider>
@@ -93,7 +156,7 @@ export const useSupplierContext = () => {
 
   if (!context) {
     throw new Error(
-      "useSupplierContext must be used inside SupplierProvider"
+      "useSupplierContext must be used inside SupplierProvider",
     );
   }
 
