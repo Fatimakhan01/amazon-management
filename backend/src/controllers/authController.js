@@ -9,20 +9,24 @@ export const signup = async (req, res) => {
 
     if (!name?.trim() || !email?.trim() || !password) {
       return res.status(400).json({
-        message: "Name, email and password are required.",
+        message: "Name, email, and password are required.",
       });
     }
 
     if (password.length < 6) {
       return res.status(400).json({
-        message: "Password must be at least 6 characters long.",
+        message: "Password must be at least 6 characters.",
       });
     }
 
     const normalizedEmail = email.trim().toLowerCase();
 
     const existingUserResult = await pool.query(
-      "SELECT id FROM users WHERE email = $1",
+      `
+        SELECT id
+        FROM users
+        WHERE email = $1
+      `,
       [normalizedEmail],
     );
 
@@ -40,17 +44,18 @@ export const signup = async (req, res) => {
         VALUES ($1, $2, $3)
         RETURNING id, name, email, created_at
       `,
-      [name.trim(), normalizedEmail, hashedPassword],
+      [
+        name.trim(),
+        normalizedEmail,
+        hashedPassword,
+      ],
     );
 
     const user = newUserResult.rows[0];
 
-    const token = generateToken(user.id);
-
     return res.status(201).json({
       message: "Account created successfully.",
       user,
-      token,
     });
   } catch (error) {
     console.error("Signup error:", error);
@@ -90,7 +95,10 @@ export const login = async (req, res) => {
 
     const user = userResult.rows[0];
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      user.password,
+    );
 
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -102,12 +110,12 @@ export const login = async (req, res) => {
 
     return res.status(200).json({
       message: "Login successful.",
+      token,
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
       },
-      token,
     });
   } catch (error) {
     console.error("Login error:", error);
