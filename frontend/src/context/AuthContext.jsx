@@ -17,8 +17,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({
   children,
 }) => {
-  const [user, setUser] =
-    useState(null);
+  const [user, setUser] = useState(null);
 
   const [loading, setLoading] =
     useState(true);
@@ -32,15 +31,15 @@ export const AuthProvider = ({
   }, []);
 
   const signup = async (userData) => {
-    const newUser =
-      signupUser(userData);
+    const response =
+      await signupUser(userData);
 
-    return newUser;
+    return response;
   };
 
   const login = async (credentials) => {
     const loggedInUser =
-      loginUser(credentials);
+      await loginUser(credentials);
 
     setUser(loggedInUser);
 
@@ -72,12 +71,11 @@ export const AuthProvider = ({
 };
 
 export const useAuth = () => {
-  const context =
-    useContext(AuthContext);
+  const context = useContext(AuthContext);
 
   if (!context) {
     throw new Error(
-      "useAuth must be used inside AuthProvider"
+      "useAuth must be used inside AuthProvider",
     );
   }
 

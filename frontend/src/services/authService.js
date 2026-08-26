@@ -1,30 +1,76 @@
-const USERS_KEY = "warehouse_users";
-const CURRENT_USER_KEY = "warehouse_current_user";
+import { API_BASE_URL } from "../config/api";
 
-const getStoredUsers = () => {
-  const storedUsers = localStorage.getItem(USERS_KEY);
+const TOKEN_KEY = "warehouse_auth_token";
+const USER_KEY = "warehouse_current_user";
 
-  if (!storedUsers) {
-    return [];
-  }
-
+const getErrorMessage = async (response) => {
   try {
-    return JSON.parse(storedUsers);
+    const data = await response.json();
+
+    return data.message || "Something went wrong.";
   } catch {
-    return [];
+    return "Something went wrong.";
   }
 };
 
-const saveUsers = (users) => {
-  localStorage.setItem(
-    USERS_KEY,
-    JSON.stringify(users)
+export const signupUser = async (userData) => {
+  const response = await fetch(
+    `${API_BASE_URL}/auth/signup`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userData),
+    },
   );
+
+  if (!response.ok) {
+    throw new Error(
+      await getErrorMessage(response),
+    );
+  }
+
+  return response.json();
+};
+
+export const loginUser = async (credentials) => {
+  const response = await fetch(
+    `${API_BASE_URL}/auth/login`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(credentials),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      await getErrorMessage(response),
+    );
+  }
+
+  const data = await response.json();
+
+  localStorage.setItem(
+    TOKEN_KEY,
+    data.token,
+  );
+
+  localStorage.setItem(
+    USER_KEY,
+    JSON.stringify(data.user),
+  );
+
+  return data.user;
 };
 
 export const getCurrentUser = () => {
-  const storedUser =
-    localStorage.getItem(CURRENT_USER_KEY);
+  const storedUser = localStorage.getItem(
+    USER_KEY,
+  );
 
   if (!storedUser) {
     return null;
@@ -37,91 +83,11 @@ export const getCurrentUser = () => {
   }
 };
 
-export const signupUser = ({
-  name,
-  email,
-  password,
-}) => {
-  const users = getStoredUsers();
-
-  const normalizedEmail =
-    email.trim().toLowerCase();
-
-  const existingUser = users.find(
-    (user) =>
-      user.email === normalizedEmail
-  );
-
-  if (existingUser) {
-    throw new Error(
-      "An account with this email already exists."
-    );
-  }
-
-  const newUser = {
-    id: crypto.randomUUID(),
-    name: name.trim(),
-    email: normalizedEmail,
-    password,
-    createdAt: new Date().toISOString(),
-  };
-
-  saveUsers([...users, newUser]);
-
-  return newUser;
-};
-
-export const loginUser = ({
-  email,
-  password,
-}) => {
-  const users = getStoredUsers();
-
-  const normalizedEmail =
-    email.trim().toLowerCase();
-
-  const user = users.find(
-    (item) =>
-      item.email === normalizedEmail &&
-      item.password === password
-  );
-
-  if (!user) {
-    throw new Error(
-      "Invalid email or password."
-    );
-  }
-
-  const currentUser = {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-  };
-
-  localStorage.setItem(
-    CURRENT_USER_KEY,
-    JSON.stringify(currentUser)
-  );
-
-  return currentUser;
+export const getAuthToken = () => {
+  return localStorage.getItem(TOKEN_KEY);
 };
 
 export const logoutUser = () => {
-  localStorage.removeItem(
-    CURRENT_USER_KEY
-  );
-};
-
-export const isEmailRegistered = (
-  email
-) => {
-  const users = getStoredUsers();
-
-  const normalizedEmail =
-    email.trim().toLowerCase();
-
-  return users.some(
-    (user) =>
-      user.email === normalizedEmail
-  );
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USER_KEY);
 };
