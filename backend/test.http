@@ -1,0 +1,21 @@
+### Health Check
+GET http://localhost:5000/
+
+### Register User
+POST http://localhost:5000/api/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Fatima",
+  "email": "fatima@example.com",
+  "password": "123456"
+}
+
+### Login User
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "fatima@example.com",
+  "password": "123456"
+}
