@@ -1,92 +1,75 @@
-const CATEGORIES_KEY = "warehouse_categories";
+const API_URL = import.meta.env.VITE_API_URL;
 
-export const getCategories = () => {
-  const storedCategories =
-    localStorage.getItem(CATEGORIES_KEY);
+const handleResponse = async (response) => {
+  const data = await response.json();
 
-  if (!storedCategories) {
-    return [];
-  }
-
-  try {
-    return JSON.parse(storedCategories);
-  } catch (error) {
-    console.error(
-      "Failed to parse categories:",
-      error
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Something went wrong.",
     );
-
-    return [];
   }
+
+  return data;
 };
 
-const saveCategories = (categories) => {
-  localStorage.setItem(
-    CATEGORIES_KEY,
-    JSON.stringify(categories)
+export const getCategories = async () => {
+  const response = await fetch(
+    `${API_URL}/categories`,
   );
+
+  const data = await handleResponse(response);
+
+  return data.categories;
 };
 
-export const createCategory = (
-  categoryData
+export const createCategory = async (
+  categoryData,
 ) => {
-  const categories = getCategories();
+  const response = await fetch(
+    `${API_URL}/categories`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(categoryData),
+    },
+  );
 
-  const newCategory = {
-    ...categoryData,
-    id: crypto.randomUUID(),
-    date:
-      categoryData.date ||
-      new Date()
-        .toISOString()
-        .split("T")[0],
-  };
+  const data = await handleResponse(response);
 
-  const updatedCategories = [
-    ...categories,
-    newCategory,
-  ];
-
-  saveCategories(updatedCategories);
-
-  return newCategory;
+  return data.category;
 };
 
-export const updateCategory = (
+export const updateCategory = async (
   categoryId,
-  categoryData
+  categoryData,
 ) => {
-  const categories = getCategories();
+  const response = await fetch(
+    `${API_URL}/categories/${categoryId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(categoryData),
+    },
+  );
 
-  const updatedCategory = {
-    ...categoryData,
-    id: categoryId,
-  };
+  const data = await handleResponse(response);
 
-  const updatedCategories =
-    categories.map((category) =>
-      category.id === categoryId
-        ? updatedCategory
-        : category
-    );
-
-  saveCategories(updatedCategories);
-
-  return updatedCategory;
+  return data.category;
 };
 
-export const deleteCategory = (
-  categoryId
+export const deleteCategory = async (
+  categoryId,
 ) => {
-  const categories = getCategories();
+  const response = await fetch(
+    `${API_URL}/categories/${categoryId}`,
+    {
+      method: "DELETE",
+    },
+  );
 
-  const updatedCategories =
-    categories.filter(
-      (category) =>
-        category.id !== categoryId
-    );
-
-  saveCategories(updatedCategories);
-
-  return updatedCategories;
+  return handleResponse(response);
 };

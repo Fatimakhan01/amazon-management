@@ -25,33 +25,49 @@ export const CategoryProvider = ({
     useState(true);
 
   useEffect(() => {
-    const storedCategories =
-      getCategories();
+    const loadCategories = async () => {
+      try {
+        const storedCategories =
+          await getCategories();
 
-    setCategories(storedCategories);
-    setLoading(false);
+        setCategories(storedCategories);
+      } catch (error) {
+        console.error(
+          "Failed to load categories:",
+          error.message,
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCategories();
   }, []);
 
-  const addCategory = (categoryData) => {
+  const addCategory = async (
+    categoryData,
+  ) => {
     const newCategory =
-      createCategory(categoryData);
+      await createCategory(categoryData);
 
     setCategories(
       (previousCategories) => [
-        ...previousCategories,
         newCategory,
-      ]
+        ...previousCategories,
+      ],
     );
+
+    return newCategory;
   };
 
-  const editCategory = (
+  const editCategory = async (
     categoryId,
-    categoryData
+    categoryData,
   ) => {
     const updatedCategory =
-      updateCategory(
+      await updateCategory(
         categoryId,
-        categoryData
+        categoryData,
       );
 
     setCategories(
@@ -60,18 +76,25 @@ export const CategoryProvider = ({
           (category) =>
             category.id === categoryId
               ? updatedCategory
-              : category
-        )
+              : category,
+        ),
     );
+
+    return updatedCategory;
   };
 
-  const removeCategory = (
-    categoryId
+  const removeCategory = async (
+    categoryId,
   ) => {
-    const updatedCategories =
-      deleteCategory(categoryId);
+    await deleteCategory(categoryId);
 
-    setCategories(updatedCategories);
+    setCategories(
+      (previousCategories) =>
+        previousCategories.filter(
+          (category) =>
+            category.id !== categoryId,
+        ),
+    );
   };
 
   return (
@@ -89,16 +112,15 @@ export const CategoryProvider = ({
   );
 };
 
-export const useCategoryContext =
-  () => {
-    const context =
-      useContext(CategoryContext);
+export const useCategoryContext = () => {
+  const context =
+    useContext(CategoryContext);
 
-    if (!context) {
-      throw new Error(
-        "useCategoryContext must be used inside CategoryProvider"
-      );
-    }
+  if (!context) {
+    throw new Error(
+      "useCategoryContext must be used inside CategoryProvider",
+    );
+  }
 
-    return context;
-  };
+  return context;
+};

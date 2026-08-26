@@ -28,7 +28,6 @@ const CategoryTable = ({
         </div>
       ),
     },
-
     {
       key: "description",
       label: "Description",
@@ -39,38 +38,40 @@ const CategoryTable = ({
         </span>
       ),
     },
-
     {
       key: "status",
       label: "Status",
       render: (category) => {
-        const statusStyles = {
-          Active:
-            "bg-green-50 text-green-700",
-          Inactive:
-            "bg-gray-100 text-gray-600",
-        };
+        const normalizedStatus =
+          category.status
+            ?.trim()
+            ?.toLowerCase();
+
+        const isActive =
+          normalizedStatus === "active";
 
         return (
           <span
             className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-              statusStyles[
-                category.status
-              ] ||
-              "bg-gray-100 text-gray-600"
+              isActive
+                ? "bg-green-50 text-green-700"
+                : "bg-gray-100 text-gray-600"
             }`}
           >
-            {category.status}
+            {category.status || "Inactive"}
           </span>
         );
       },
     },
-
     {
       key: "date",
       label: "Date",
+      render: (category) => (
+        <span className="text-gray-600">
+          {category.date || "-"}
+        </span>
+      ),
     },
-
     {
       key: "actions",
       label: "Actions",
@@ -78,9 +79,7 @@ const CategoryTable = ({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() =>
-              onEdit(category)
-            }
+            onClick={() => onEdit(category)}
             className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
           >
             <FiEdit2 size={16} />
@@ -88,9 +87,7 @@ const CategoryTable = ({
 
           <button
             type="button"
-            onClick={() =>
-              onDelete(category)
-            }
+            onClick={() => onDelete(category)}
             className="rounded-lg p-2 text-red-500 transition hover:bg-red-50 hover:text-red-700"
           >
             <FiTrash2 size={16} />

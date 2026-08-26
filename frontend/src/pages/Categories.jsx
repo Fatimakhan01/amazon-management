@@ -47,6 +47,8 @@ const Categories = () => {
   const [statusFilter, setStatusFilter] =
     useState("");
 
+  const [error, setError] = useState("");
+
   const filteredCategories =
     useMemo(() => {
       const normalizedSearch =
@@ -61,12 +63,12 @@ const Categories = () => {
             category.name
               ?.toLowerCase()
               .includes(
-                normalizedSearch
+                normalizedSearch,
               ) ||
             category.description
               ?.toLowerCase()
               .includes(
-                normalizedSearch
+                normalizedSearch,
               );
 
           const matchesStatus =
@@ -78,7 +80,7 @@ const Categories = () => {
             matchesSearch &&
             matchesStatus
           );
-        }
+        },
       );
     }, [
       categories,
@@ -91,28 +93,32 @@ const Categories = () => {
     Boolean(statusFilter);
 
   const handleAddCategory = () => {
+    setError("");
     setSelectedCategory(null);
     setIsEditing(false);
     setIsCategoryModalOpen(true);
   };
 
   const handleEditCategory = (
-    category
+    category,
   ) => {
+    setError("");
     setSelectedCategory(category);
     setIsEditing(true);
     setIsCategoryModalOpen(true);
   };
 
   const handleDeleteCategory = (
-    category
+    category,
   ) => {
+    setError("");
     setSelectedCategory(category);
     setIsDeleteModalOpen(true);
   };
 
   const handleCloseCategoryModal =
     () => {
+      setError("");
       setIsCategoryModalOpen(false);
       setSelectedCategory(null);
       setIsEditing(false);
@@ -120,38 +126,57 @@ const Categories = () => {
 
   const handleCloseDeleteModal =
     () => {
+      setError("");
       setIsDeleteModalOpen(false);
       setSelectedCategory(null);
     };
 
-  const handleSubmitCategory = (
-    formData
+  const handleSubmitCategory = async (
+    formData,
   ) => {
-    if (
-      isEditing &&
-      selectedCategory
-    ) {
-      editCategory(
-        selectedCategory.id,
-        formData
-      );
-    } else {
-      addCategory(formData);
-    }
+    try {
+      setError("");
 
-    handleCloseCategoryModal();
+      if (
+        isEditing &&
+        selectedCategory
+      ) {
+        await editCategory(
+          selectedCategory.id,
+          formData,
+        );
+      } else {
+        await addCategory(formData);
+      }
+
+      handleCloseCategoryModal();
+    } catch (categoryError) {
+      setError(
+        categoryError.message ||
+          "Failed to save category.",
+      );
+    }
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!selectedCategory) {
       return;
     }
 
-    removeCategory(
-      selectedCategory.id
-    );
+    try {
+      setError("");
 
-    handleCloseDeleteModal();
+      await removeCategory(
+        selectedCategory.id,
+      );
+
+      handleCloseDeleteModal();
+    } catch (categoryError) {
+      setError(
+        categoryError.message ||
+          "Failed to delete category.",
+      );
+    }
   };
 
   const handleClearFilters = () => {
@@ -207,6 +232,12 @@ const Categories = () => {
         }
         size="md"
       >
+        {error && (
+          <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            {error}
+          </div>
+        )}
+
         <CategoryForm
           initialValues={
             selectedCategory ||
@@ -232,6 +263,12 @@ const Categories = () => {
         size="sm"
       >
         <div className="space-y-5">
+          {error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+
           <p className="text-sm leading-6 text-gray-600">
             Are you sure you want to
             delete{" "}
