@@ -27,6 +27,7 @@ import { StockOutProvider } from "./context/StockOutContext";
 import { OrderProvider } from "./context/OrderContext";
 import { WastageProvider } from "./context/WastageContext";
 import { SettingsProvider } from "./context/SettingsContext";
+import { ReportProvider } from "./context/ReportsContext";
 
 function App() {
   return (
@@ -39,41 +40,70 @@ function App() {
                 <OrderProvider>
                   <WastageProvider>
                     <SettingsProvider>
-                      <BrowserRouter>
-                        <Routes>
-                          <Route element={<AuthLayout />}>
-                            <Route path="/" element={<Login />} />
-                            <Route path="/signup" element={<Signup />} />
-                          </Route>
-
-                          <Route element={<ProtectedRoute />}>
-                            <Route element={<DashboardLayout />}>
-                              <Route
-                                path="/dashboard"
-                                element={<Dashboard />}
-                              />
-
-                              <Route path="/products" element={<Products />} />
-
-                              <Route
-                                path="/categories"
-                                element={<Categories />}
-                              />
-
-                              <Route
-                                path="/suppliers"
-                                element={<Suppliers />}
-                              />
-                              <Route path="/stock-in" element={<StockIn />} />
-                              <Route path="/stock-out" element={<StockOut />} />
-                              <Route path="/orders" element={<Orders />} />
-                              <Route path="/wastage" element={<Wastage />} />
-                              <Route path="/reports" element={<Reports />} />
-                              <Route path="/settings" element={<Settings />} />
+                      <ReportProvider>
+                        <BrowserRouter>
+                          <Routes>
+                            <Route element={<AuthLayout />}>
+                              <Route path="/" element={<Login />} />
+                              <Route path="/signup" element={<Signup />} />
                             </Route>
-                          </Route>
-                        </Routes>
-                      </BrowserRouter>
+
+                            <Route element={<ProtectedRoute />}>
+                              <Route element={<DashboardLayout />}>
+                                <Route
+                                  path="/dashboard"
+                                  element={<Dashboard />}
+                                />
+
+                                <Route
+                                  path="/products"
+                                  element={<Products />}
+                                />
+
+                                <Route
+                                  path="/categories"
+                                  element={<Categories />}
+                                />
+
+                                <Route
+                                  path="/suppliers"
+                                  element={<Suppliers />}
+                                />
+
+                                <Route
+                                  path="/stock-in"
+                                  element={<StockIn />}
+                                />
+
+                                <Route
+                                  path="/stock-out"
+                                  element={<StockOut />}
+                                />
+
+                                <Route
+                                  path="/orders"
+                                  element={<Orders />}
+                                />
+
+                                <Route
+                                  path="/wastage"
+                                  element={<Wastage />}
+                                />
+
+                                <Route
+                                  path="/reports"
+                                  element={<Reports />}
+                                />
+
+                                <Route
+                                  path="/settings"
+                                  element={<Settings />}
+                                />
+                              </Route>
+                            </Route>
+                          </Routes>
+                        </BrowserRouter>
+                      </ReportProvider>
                     </SettingsProvider>
                   </WastageProvider>
                 </OrderProvider>
