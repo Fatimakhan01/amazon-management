@@ -1,50 +1,33 @@
-const STOCK_OUT_KEY =
-  "warehouse_stock_out";
+const API_URL = import.meta.env.VITE_API_URL;
 
-export const getStockOuts = () => {
-  const storedStockOuts =
-    localStorage.getItem(STOCK_OUT_KEY);
+const handleResponse = async (response) => {
+  const data = await response.json();
 
-  if (!storedStockOuts) {
-    return [];
+  if (!response.ok) {
+    throw new Error(data.message || "Something went wrong.");
   }
 
-  try {
-    return JSON.parse(storedStockOuts);
-  } catch (error) {
-    console.error(
-      "Failed to load stock out records:",
-      error
-    );
-
-    return [];
-  }
+  return data;
 };
 
-export const createStockOut = (
-  stockOutData
-) => {
-  const stockOuts = getStockOuts();
+export const getStockOuts = async () => {
+  const response = await fetch(`${API_URL}/stock-outs`);
 
-  const newStockOut = {
-    ...stockOutData,
-    id: crypto.randomUUID(),
-    quantity: Number(
-      stockOutData.quantity
-    ),
-    createdAt:
-      new Date().toISOString(),
-  };
+  const data = await handleResponse(response);
 
-  const updatedStockOuts = [
-    ...stockOuts,
-    newStockOut,
-  ];
+  return data.stockOuts;
+};
 
-  localStorage.setItem(
-    STOCK_OUT_KEY,
-    JSON.stringify(updatedStockOuts)
-  );
+export const createStockOut = async (stockOutData) => {
+  const response = await fetch(`${API_URL}/stock-outs`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(stockOutData),
+  });
 
-  return newStockOut;
+  const data = await handleResponse(response);
+
+  return data.stockOut;
 };

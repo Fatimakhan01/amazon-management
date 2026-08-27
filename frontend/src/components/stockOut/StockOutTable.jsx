@@ -2,24 +2,16 @@ import Card from "../Card";
 import Table from "../Table";
 
 import { useStockOutContext } from "../../context/StockOutContext";
-import { useProductContext } from "../../context/ProductContext";
 
 const StockOutTable = () => {
   const { stockOuts } = useStockOutContext();
-
-  const { products } = useProductContext();
-
-  const getProductName = (productId) => {
-    const product = products.find((item) => item.id === productId);
-
-    return product?.name || "Unknown";
-  };
 
   const columns = [
     {
       key: "product",
       label: "Product",
-      render: (stockOut) => getProductName(stockOut.productId),
+      render: (stockOut) =>
+        stockOut.product_name || "Unknown",
     },
 
     {
@@ -45,17 +37,16 @@ const StockOutTable = () => {
     {
       key: "note",
       label: "Note",
-      render: (stockOut) => stockOut.note || "—",
+      render: (stockOut) =>
+        stockOut.note || "—",
     },
   ];
-
-  const sortedStockOuts = [...stockOuts].reverse();
 
   return (
     <Card padding={false}>
       <Table
         columns={columns}
-        data={sortedStockOuts}
+        data={stockOuts}
         rowKey="id"
         emptyMessage="No stock out records found."
       />

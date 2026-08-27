@@ -8,12 +8,8 @@ import Modal from "../components/Modal";
 
 import { useStockOutContext } from "../context/StockOutContext";
 
-import { useProductContext } from "../context/ProductContext";
-
 const StockOut = () => {
   const { addStockOut } = useStockOutContext();
-
-  const { decreaseProductStock } = useProductContext();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -29,21 +25,25 @@ const StockOut = () => {
     setIsModalOpen(false);
   };
 
-  const handleSubmit = (data) => {
+  const handleSubmit = async (data) => {
     try {
-      decreaseProductStock(data.productId, data.quantity);
+      setError("");
 
-      addStockOut(data);
+      await addStockOut(data);
 
       handleCloseModal();
     } catch (error) {
-      setError(error.message || "Failed to remove stock.");
+      setError(
+        error.message || "Failed to remove stock.",
+      );
     }
   };
 
   return (
     <div className="space-y-6">
-      <StockOutHeader onAddStockOut={handleOpenModal} />
+      <StockOutHeader
+        onAddStockOut={handleOpenModal}
+      />
 
       <StockOutStats />
 
@@ -62,7 +62,10 @@ const StockOut = () => {
           </div>
         )}
 
-        <StockOutForm onSubmit={handleSubmit} onCancel={handleCloseModal} />
+        <StockOutForm
+          onSubmit={handleSubmit}
+          onCancel={handleCloseModal}
+        />
       </Modal>
     </div>
   );
