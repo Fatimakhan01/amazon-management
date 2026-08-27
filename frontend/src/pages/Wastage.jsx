@@ -9,14 +9,12 @@ import Modal from "../components/Modal";
 
 import { useWastageContext } from "../context/WastageContext";
 
-import { useProductContext } from "../context/ProductContext";
-
 const Wastage = () => {
-  const { wastages, addWastage } = useWastageContext();
+  const { wastages, addWastage } =
+    useWastageContext();
 
-  const { decreaseProductStock } = useProductContext();
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] =
+    useState(false);
 
   const [error, setError] = useState("");
 
@@ -30,25 +28,32 @@ const Wastage = () => {
     setIsModalOpen(false);
   };
 
-  const handleSubmit = (data) => {
+  const handleSubmit = async (data) => {
     try {
-      decreaseProductStock(data.productId, data.quantity);
+      setError("");
 
-      addWastage(data);
+      await addWastage(data);
 
       handleCloseModal();
     } catch (error) {
-      setError(error.message || "Failed to record wastage.");
+      setError(
+        error.message ||
+          "Failed to record wastage.",
+      );
     }
   };
 
   return (
     <div className="space-y-6">
-      <WastageHeader onAddWastage={handleOpenModal} />
+      <WastageHeader
+        onAddWastage={handleOpenModal}
+      />
 
       <WastageStats />
 
-      <WastageTable wastages={wastages} />
+      <WastageTable
+        wastages={wastages}
+      />
 
       <Modal
         isOpen={isModalOpen}
@@ -63,7 +68,10 @@ const Wastage = () => {
           </div>
         )}
 
-        <WastageForm onSubmit={handleSubmit} onCancel={handleCloseModal} />
+        <WastageForm
+          onSubmit={handleSubmit}
+          onCancel={handleCloseModal}
+        />
       </Modal>
     </div>
   );
