@@ -6,23 +6,12 @@ import {
 
 import Card from "../Card";
 import Table from "../Table";
-import { useSupplierContext } from "../../context/SupplierContext";
 
 const ProductTable = ({
   products,
   onEdit,
   onDelete,
 }) => {
-  const { suppliers } = useSupplierContext();
-
-  const getSupplierName = (supplierId) => {
-    const supplier = suppliers.find(
-      (item) => item.id === supplierId
-    );
-
-    return supplier?.name || "Unknown Supplier";
-  };
-
   const productColumns = [
     {
       key: "name",
@@ -47,16 +36,23 @@ const ProductTable = ({
     },
 
     {
-      key: "category",
+      key: "categoryName",
       label: "Category",
+      render: (product) => (
+        <span className="text-gray-700">
+          {product.categoryName ||
+            "No Category"}
+        </span>
+      ),
     },
 
     {
-      key: "supplierId",
+      key: "supplierName",
       label: "Supplier",
       render: (product) => (
         <span className="text-gray-700">
-          {getSupplierName(product.supplierId)}
+          {product.supplierName ||
+            "Unknown Supplier"}
         </span>
       ),
     },
@@ -65,7 +61,9 @@ const ProductTable = ({
       key: "quantity",
       label: "Stock",
       render: (product) => {
-        const quantity = Number(product.quantity || 0);
+        const quantity = Number(
+          product.quantity || 0
+        );
 
         const className =
           quantity === 0
@@ -96,9 +94,12 @@ const ProductTable = ({
       label: "Status",
       render: (product) => {
         const statusStyles = {
-          "In Stock": "bg-green-50 text-green-700",
-          "Low Stock": "bg-orange-50 text-orange-700",
-          "Out of Stock": "bg-red-50 text-red-700",
+          "In Stock":
+            "bg-green-50 text-green-700",
+          "Low Stock":
+            "bg-orange-50 text-orange-700",
+          "Out of Stock":
+            "bg-red-50 text-red-700",
         };
 
         return (
@@ -121,7 +122,9 @@ const ProductTable = ({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => onEdit(product)}
+            onClick={() =>
+              onEdit(product)
+            }
             className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
           >
             <FiEdit2 size={16} />
@@ -129,7 +132,9 @@ const ProductTable = ({
 
           <button
             type="button"
-            onClick={() => onDelete(product)}
+            onClick={() =>
+              onDelete(product)
+            }
             className="rounded-lg p-2 text-red-500 transition hover:bg-red-50 hover:text-red-700"
           >
             <FiTrash2 size={16} />
