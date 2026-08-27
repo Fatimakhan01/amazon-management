@@ -7,16 +7,16 @@ import StockInTable from "../components/stockIn/StockInTable";
 import Modal from "../components/Modal";
 
 import { useStockInContext } from "../context/StockInContext";
-import { useProductContext } from "../context/ProductContext";
 
 const StockIn = () => {
-  const { addStockIn } = useStockInContext();
+  const { addStockIn } =
+    useStockInContext();
 
-  const { increaseProductStock } = useProductContext();
+  const [isModalOpen, setIsModalOpen] =
+    useState(false);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const [error, setError] = useState("");
+  const [error, setError] =
+    useState("");
 
   const handleOpenModal = () => {
     setError("");
@@ -28,21 +28,24 @@ const StockIn = () => {
     setIsModalOpen(false);
   };
 
-  const handleSubmit = (data) => {
+  const handleSubmit = async (data) => {
     try {
-      increaseProductStock(data.productId, data.quantity);
-
-      addStockIn(data);
+      await addStockIn(data);
 
       handleCloseModal();
     } catch (error) {
-      setError(error.message || "Failed to add stock.");
+      setError(
+        error.message ||
+          "Failed to add stock.",
+      );
     }
   };
 
   return (
     <div className="space-y-6">
-      <StockInHeader onAddStockIn={handleOpenModal} />
+      <StockInHeader
+        onAddStockIn={handleOpenModal}
+      />
 
       <StockInStats />
 
@@ -61,7 +64,10 @@ const StockIn = () => {
           </div>
         )}
 
-        <StockInForm onSubmit={handleSubmit} onCancel={handleCloseModal} />
+        <StockInForm
+          onSubmit={handleSubmit}
+          onCancel={handleCloseModal}
+        />
       </Modal>
     </div>
   );

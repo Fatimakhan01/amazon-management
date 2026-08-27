@@ -1,50 +1,42 @@
-const STOCK_IN_KEY =
-  "warehouse_stock_in";
+const API_URL = import.meta.env.VITE_API_URL;
 
-export const getStockIns = () => {
-  const storedStockIns =
-    localStorage.getItem(STOCK_IN_KEY);
+const handleResponse = async (response) => {
+  const data = await response.json();
 
-  if (!storedStockIns) {
-    return [];
-  }
-
-  try {
-    return JSON.parse(storedStockIns);
-  } catch (error) {
-    console.error(
-      "Failed to load stock in records:",
-      error
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Something went wrong.",
     );
-
-    return [];
   }
+
+  return data;
 };
 
-export const createStockIn = (
-  stockInData
-) => {
-  const stockIns = getStockIns();
-
-  const newStockIn = {
-    ...stockInData,
-    id: crypto.randomUUID(),
-    quantity: Number(
-      stockInData.quantity
-    ),
-    createdAt:
-      new Date().toISOString(),
-  };
-
-  const updatedStockIns = [
-    ...stockIns,
-    newStockIn,
-  ];
-
-  localStorage.setItem(
-    STOCK_IN_KEY,
-    JSON.stringify(updatedStockIns)
+export const getStockIns = async () => {
+  const response = await fetch(
+    `${API_URL}/stock-ins`,
   );
 
-  return newStockIn;
+  const data = await handleResponse(response);
+
+  return data.stockIns;
+};
+
+export const createStockIn = async (
+  stockInData,
+) => {
+  const response = await fetch(
+    `${API_URL}/stock-ins`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(stockInData),
+    },
+  );
+
+  const data = await handleResponse(response);
+
+  return data.stockIn;
 };

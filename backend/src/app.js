@@ -5,6 +5,8 @@ import authRoutes from "./routes/authRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import supplierRoutes from "./routes/supplierRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
+import stockInRoutes from "./routes/stockInRoutes.js";
+import stockOutRoutes from "./routes/stockOutRoutes.js";
 
 const app = express();
 
@@ -21,5 +23,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/suppliers", supplierRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/stock-ins", stockInRoutes);
+app.use("/api/stock-outs", stockOutRoutes);
 
 export default app;
