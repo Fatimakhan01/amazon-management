@@ -1,40 +1,51 @@
-const SETTINGS_KEY = "warehouse_settings";
+const API_URL = "http://localhost:5000/api/settings";
 
-const defaultSettings = {
-  warehouseName: "Amazon Warehouse",
-  lowStockThreshold: 10,
-  currency: "PKR",
-  emailNotifications: true,
-  lowStockNotifications: true,
-};
+export const getSettings = async () => {
+  const response = await fetch(API_URL);
 
-export const getSettings = () => {
-  const storedSettings = localStorage.getItem(SETTINGS_KEY);
+  const data = await response.json();
 
-  if (!storedSettings) {
-    return defaultSettings;
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to fetch settings.");
   }
 
-  try {
-    return {
-      ...defaultSettings,
-      ...JSON.parse(storedSettings),
-    };
-  } catch (error) {
-    console.error("Failed to load settings:", error);
+  return data.settings;
+};
 
-    return defaultSettings;
+export const saveSettings = async (settings) => {
+  const response = await fetch(API_URL, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      warehouseName: settings.warehouseName,
+      lowStockThreshold: Number(settings.lowStockThreshold),
+      currency: settings.currency,
+      emailNotifications: settings.emailNotifications,
+      lowStockNotifications: settings.lowStockNotifications,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to save settings.");
   }
+
+  return data.settings;
 };
 
-export const saveSettings = (settings) => {
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+export const resetSettings = async () => {
+  const response = await fetch(`${API_URL}/reset`, {
+    method: "POST",
+  });
 
-  return settings;
-};
+  const data = await response.json();
 
-export const resetSettings = () => {
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(defaultSettings));
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to reset settings.");
+  }
 
-  return defaultSettings;
+  return data.settings;
 };

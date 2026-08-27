@@ -17,10 +17,12 @@ import RevenueChart from "../components/dashboard/RevenueChart";
 
 import { useProductContext } from "../context/ProductContext";
 import { useOrderContext } from "../context/OrderContext";
+import { useSettingsContext } from "../context/SettingsContext";
 
 const Dashboard = () => {
   const { products } = useProductContext();
   const { orders } = useOrderContext();
+  const { settings } = useSettingsContext();
 
   const totalProducts = products.length;
 
@@ -30,10 +32,17 @@ const Dashboard = () => {
     0
   );
 
+  const lowStockThreshold = Number(
+    settings?.lowStockThreshold || 10
+  );
+
   const lowStock = products.filter((product) => {
     const quantity = Number(product.quantity || 0);
 
-    return quantity > 0 && quantity < 10;
+    return (
+      quantity > 0 &&
+      quantity < lowStockThreshold
+    );
   }).length;
 
   const outOfStock = products.filter(
@@ -56,9 +65,10 @@ const Dashboard = () => {
   );
 
   const pendingOrders = orders.filter(
-  (order) =>
-    String(order.status || "").toLowerCase() === "pending"
-).length;
+    (order) =>
+      String(order.status || "").toLowerCase() ===
+      "pending"
+  ).length;
 
   const stats = [
     {
@@ -134,12 +144,18 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <RevenueChart orders={orders} />
-        <OrderStatusChart orders={orders} />
+
+        <OrderStatusChart
+          orders={orders}
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <LowStockList />
-        <RecentOrders orders={orders} />
+
+        <RecentOrders
+          orders={orders}
+        />
       </div>
     </div>
   );
