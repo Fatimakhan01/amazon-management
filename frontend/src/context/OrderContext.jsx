@@ -1,45 +1,78 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
-import {getOrders,createOrder,updateOrder,deleteOrder,} from "../services/orderService";
+import {
+  getOrders,
+  createOrder,
+} from "../services/orderService";
 
 const OrderContext = createContext(null);
 
-export const OrderProvider = ({ children }) => {
+export const OrderProvider = ({
+  children,
+}) => {
   const [orders, setOrders] = useState([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
 
   useEffect(() => {
-    const storedOrders = getOrders();
+    const loadOrders = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-    setOrders(storedOrders);
-    setLoading(false);
+        const data = await getOrders();
+
+        setOrders(data);
+      } catch (error) {
+        console.error(
+          "Failed to load orders:",
+          error,
+        );
+
+        setError(
+          error.message ||
+            "Failed to load orders.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadOrders();
   }, []);
 
-  const addOrder = (orderData) => {
-    const newOrder = createOrder(orderData);
+  const addOrder = async (orderData) => {
+    try {
+      setError("");
 
-    setOrders((previousOrders) => [...previousOrders, newOrder]);
+      const newOrder =
+        await createOrder(orderData);
 
-    return newOrder;
-  };
+      setOrders(
+        (previousOrders) => [
+          ...previousOrders,
+          newOrder,
+        ],
+      );
 
-  const editOrder = (orderId, orderData) => {
-    const updatedOrder = updateOrder(orderId, orderData);
+      return newOrder;
+    } catch (error) {
+      setError(
+        error.message ||
+          "Failed to create order.",
+      );
 
-    setOrders((previousOrders) =>
-      previousOrders.map((order) =>
-        order.id === orderId ? updatedOrder : order,
-      ),
-    );
-
-    return updatedOrder;
-  };
-
-  const removeOrder = (orderId) => {
-    const updatedOrders = deleteOrder(orderId);
-
-    setOrders(updatedOrders);
+      throw error;
+    }
   };
 
   return (
@@ -47,9 +80,8 @@ export const OrderProvider = ({ children }) => {
       value={{
         orders,
         loading,
+        error,
         addOrder,
-        editOrder,
-        removeOrder,
       }}
     >
       {children}
@@ -58,10 +90,13 @@ export const OrderProvider = ({ children }) => {
 };
 
 export const useOrderContext = () => {
-  const context = useContext(OrderContext);
+  const context =
+    useContext(OrderContext);
 
   if (!context) {
-    throw new Error("useOrderContext must be used inside OrderProvider.");
+    throw new Error(
+      "useOrderContext must be used inside OrderProvider.",
+    );
   }
 
   return context;

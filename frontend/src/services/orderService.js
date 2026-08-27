@@ -1,89 +1,42 @@
-import {calculateOrderProfit,calculateOrderRevenue,} from "../utils/orderUtils";
+const API_URL = import.meta.env.VITE_API_URL;
 
-const ORDERS_KEY = "warehouse_orders";
+const handleResponse = async (response) => {
+  const data = await response.json();
 
-export const getOrders = () => {
-  const storedOrders = localStorage.getItem(ORDERS_KEY);
-
-  if (!storedOrders) {
-    return [];
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Something went wrong.",
+    );
   }
 
-  try {
-    return JSON.parse(storedOrders);
-  } catch (error) {
-    console.error("Failed to parse orders:", error);
-
-    return [];
-  }
+  return data;
 };
 
-const saveOrders = (orders) => {
-  localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
-};
-
-export const createOrder = (orderData) => {
-  const orders = getOrders();
-
-  const quantity = Number(orderData.quantity || 0);
-
-  const sellingPrice = Number(orderData.sellingPrice || 0);
-
-  const costPrice = Number(orderData.costPrice || 0);
-
-  const newOrder = {
-    ...orderData,
-    id: crypto.randomUUID(),
-    quantity,
-    sellingPrice,
-    costPrice,
-    revenue: calculateOrderRevenue(sellingPrice, quantity),
-    profit: calculateOrderProfit(sellingPrice, costPrice, quantity),
-    status: orderData.status || "Pending",
-    date: orderData.date || new Date().toISOString().split("T")[0],
-  };
-
-  const updatedOrders = [...orders, newOrder];
-
-  saveOrders(updatedOrders);
-
-  return newOrder;
-};
-
-export const updateOrder = (orderId, orderData) => {
-  const orders = getOrders();
-
-  const quantity = Number(orderData.quantity || 0);
-
-  const sellingPrice = Number(orderData.sellingPrice || 0);
-
-  const costPrice = Number(orderData.costPrice || 0);
-
-  const updatedOrder = {
-    ...orderData,
-    id: orderId,
-    quantity,
-    sellingPrice,
-    costPrice,
-    revenue: calculateOrderRevenue(sellingPrice, quantity),
-    profit: calculateOrderProfit(sellingPrice, costPrice, quantity),
-  };
-
-  const updatedOrders = orders.map((order) =>
-    order.id === orderId ? updatedOrder : order,
+export const getOrders = async () => {
+  const response = await fetch(
+    `${API_URL}/orders`,
   );
 
-  saveOrders(updatedOrders);
+  const data = await handleResponse(response);
 
-  return updatedOrder;
+  return data.orders;
 };
 
-export const deleteOrder = (orderId) => {
-  const orders = getOrders();
+export const createOrder = async (
+  orderData,
+) => {
+  const response = await fetch(
+    `${API_URL}/orders`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(orderData),
+    },
+  );
 
-  const updatedOrders = orders.filter((order) => order.id !== orderId);
+  const data = await handleResponse(response);
 
-  saveOrders(updatedOrders);
-
-  return updatedOrders;
+  return data.order;
 };
