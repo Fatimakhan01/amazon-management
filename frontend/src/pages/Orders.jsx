@@ -9,16 +9,15 @@ import Modal from "../components/Modal";
 
 import { useOrderContext } from "../context/OrderContext";
 
-import { useProductContext } from "../context/ProductContext";
-
 const Orders = () => {
-  const { orders, addOrder } = useOrderContext();
+  const { orders, addOrder } =
+    useOrderContext();
 
-  const { decreaseProductStock } = useProductContext();
+  const [isModalOpen, setIsModalOpen] =
+    useState(false);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const [error, setError] = useState("");
+  const [error, setError] =
+    useState("");
 
   const handleOpenModal = () => {
     setError("");
@@ -30,21 +29,26 @@ const Orders = () => {
     setIsModalOpen(false);
   };
 
-  const handleSubmit = (data) => {
+  const handleSubmit = async (data) => {
     try {
-      decreaseProductStock(data.productId, data.quantity);
+      setError("");
 
-      addOrder(data);
+      await addOrder(data);
 
       handleCloseModal();
     } catch (error) {
-      setError(error.message || "Failed to create order.");
+      setError(
+        error.message ||
+          "Failed to create order.",
+      );
     }
   };
 
   return (
     <div className="space-y-6">
-      <OrderHeader onAddOrder={handleOpenModal} />
+      <OrderHeader
+        onAddOrder={handleOpenModal}
+      />
 
       <OrderStats />
 
@@ -63,7 +67,10 @@ const Orders = () => {
           </div>
         )}
 
-        <OrderForm onSubmit={handleSubmit} onCancel={handleCloseModal} />
+        <OrderForm
+          onSubmit={handleSubmit}
+          onCancel={handleCloseModal}
+        />
       </Modal>
     </div>
   );

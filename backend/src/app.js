@@ -7,6 +7,7 @@ import supplierRoutes from "./routes/supplierRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import stockInRoutes from "./routes/stockInRoutes.js";
 import stockOutRoutes from "./routes/stockOutRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 
 const app = express();
 
@@ -25,5 +26,6 @@ app.use("/api/suppliers", supplierRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/stock-ins", stockInRoutes);
 app.use("/api/stock-outs", stockOutRoutes);
+app.use("/api/orders", orderRoutes);
 
 export default app;
