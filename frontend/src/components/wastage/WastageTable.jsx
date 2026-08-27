@@ -6,7 +6,7 @@ import Table from "../Table";
 const WastageTable = ({ wastages }) => {
   const columns = [
     {
-      key: "productName",
+      key: "product",
       label: "Product",
       render: (wastage) => (
         <div className="flex items-center gap-3">
@@ -15,7 +15,7 @@ const WastageTable = ({ wastages }) => {
           </div>
 
           <span className="font-medium text-gray-900">
-            {wastage.productName}
+            {wastage.productName || wastage.product_name || "Unknown"}
           </span>
         </div>
       ),
@@ -24,13 +24,17 @@ const WastageTable = ({ wastages }) => {
     {
       key: "quantity",
       label: "Quantity",
+      render: (wastage) =>
+        Number(wastage.quantity || 0).toLocaleString(),
     },
 
     {
       key: "costPrice",
       label: "Cost Price",
       render: (wastage) =>
-        `Rs. ${Number(wastage.costPrice || 0).toLocaleString()}`,
+        `Rs. ${Number(
+          wastage.costPrice ?? wastage.cost_price ?? 0
+        ).toLocaleString()}`,
     },
 
     {
@@ -38,7 +42,8 @@ const WastageTable = ({ wastages }) => {
       label: "Loss",
       render: (wastage) => (
         <span className="font-medium text-red-600">
-          Rs. {Number(wastage.loss || 0).toLocaleString()}
+          Rs.{" "}
+          {Number(wastage.loss ?? 0).toLocaleString()}
         </span>
       ),
     },
@@ -46,6 +51,7 @@ const WastageTable = ({ wastages }) => {
     {
       key: "reason",
       label: "Reason",
+      render: (wastage) => wastage.reason || "—",
     },
 
     {

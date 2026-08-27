@@ -1,58 +1,54 @@
-import { calculateWastageLoss } from "../utils/wastageUtils";
+const API_URL = "http://localhost:5000/api/wastages";
 
-const WASTAGE_KEY = "warehouse_wastage";
+export const getWastages = async () => {
+  const response = await fetch(API_URL);
 
-export const getWastages = () => {
-  const storedWastage = localStorage.getItem(WASTAGE_KEY);
+  const data = await response.json();
 
-  if (!storedWastage) {
-    return [];
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Failed to fetch wastage records.",
+    );
   }
 
-  try {
-    return JSON.parse(storedWastage);
-  } catch (error) {
-    console.error("Failed to parse wastage:", error);
+  return data.wastages;
+};
 
-    return [];
+export const createWastage = async (wastageData) => {
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(wastageData),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Failed to create wastage record.",
+    );
   }
+
+  return data.wastage;
 };
 
-const saveWastages = (wastages) => {
-  localStorage.setItem(WASTAGE_KEY, JSON.stringify(wastages));
-};
-
-export const createWastage = (wastageData) => {
-  const wastages = getWastages();
-
-  const quantity = Number(wastageData.quantity || 0);
-
-  const costPrice = Number(wastageData.costPrice || 0);
-
-  const newWastage = {
-    ...wastageData,
-    id: crypto.randomUUID(),
-    quantity,
-    costPrice,
-    loss: calculateWastageLoss(costPrice, quantity),
-    date: wastageData.date || new Date().toISOString().split("T")[0],
-  };
-
-  const updatedWastages = [...wastages, newWastage];
-
-  saveWastages(updatedWastages);
-
-  return newWastage;
-};
-
-export const deleteWastage = (wastageId) => {
-  const wastages = getWastages();
-
-  const updatedWastages = wastages.filter(
-    (wastage) => wastage.id !== wastageId,
+export const deleteWastage = async (wastageId) => {
+  const response = await fetch(
+    `${API_URL}/${wastageId}`,
+    {
+      method: "DELETE",
+    },
   );
 
-  saveWastages(updatedWastages);
+  const data = await response.json();
 
-  return updatedWastages;
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Failed to delete wastage record.",
+    );
+  }
+
+  return data;
 };
