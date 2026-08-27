@@ -8,6 +8,10 @@ const SettingsForm = ({ settings, onSave, onReset }) => {
 
   const [saved, setSaved] = useState(false);
 
+  const [saving, setSaving] = useState(false);
+
+  const [resetting, setResetting] = useState(false);
+
   useEffect(() => {
     setFormData(settings);
   }, [settings]);
@@ -23,15 +27,39 @@ const SettingsForm = ({ settings, onSave, onReset }) => {
     setSaved(false);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    onSave({
-      ...formData,
-      lowStockThreshold: Number(formData.lowStockThreshold),
-    });
+    try {
+      setSaving(true);
+      setSaved(false);
 
-    setSaved(true);
+      await onSave({
+        ...formData,
+        lowStockThreshold: Number(formData.lowStockThreshold),
+      });
+
+      setSaved(true);
+    } catch (error) {
+      setSaved(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleReset = async () => {
+    try {
+      setResetting(true);
+      setSaved(false);
+
+      await onReset();
+
+      setSaved(false);
+    } catch (error) {
+      setSaved(false);
+    } finally {
+      setResetting(false);
+    }
   };
 
   return (
@@ -109,7 +137,9 @@ const SettingsForm = ({ settings, onSave, onReset }) => {
         </div>
 
         <div className="space-y-4 border-t border-gray-200 pt-5">
-          <h3 className="font-medium text-gray-900">Notifications</h3>
+          <h3 className="font-medium text-gray-900">
+            Notifications
+          </h3>
 
           <label className="flex cursor-pointer items-center justify-between gap-4">
             <div>
@@ -153,11 +183,21 @@ const SettingsForm = ({ settings, onSave, onReset }) => {
         </div>
 
         <div className="flex flex-col-reverse gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:justify-end">
-          <Button type="button" variant="secondary" onClick={onReset}>
-            Reset
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleReset}
+            disabled={resetting || saving}
+          >
+            {resetting ? "Resetting..." : "Reset"}
           </Button>
 
-          <Button type="submit">Save Settings</Button>
+          <Button
+            type="submit"
+            disabled={saving || resetting}
+          >
+            {saving ? "Saving..." : "Save Settings"}
+          </Button>
         </div>
 
         {saved && (

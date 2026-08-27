@@ -1,6 +1,10 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-import {getSettings,saveSettings,resetSettings,} from "../services/settingsService";
+import {
+  getSettings,
+  saveSettings,
+  resetSettings,
+} from "../services/settingsService";
 
 const SettingsContext = createContext(null);
 
@@ -9,32 +13,63 @@ export const SettingsProvider = ({ children }) => {
 
   const [loading, setLoading] = useState(true);
 
+  const [error, setError] = useState("");
+
   useEffect(() => {
-    const storedSettings = getSettings();
+    const loadSettings = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-    setSettings(storedSettings);
-    setLoading(false);
-  }, []);
+        const data = await getSettings();
 
-  const updateSettings = (updatedSettings) => {
-    const newSettings = {
-      ...settings,
-      ...updatedSettings,
+        setSettings(data);
+      } catch (error) {
+        console.error("Failed to load settings:", error);
+
+        setError(error.message || "Failed to load settings.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    saveSettings(newSettings);
+    loadSettings();
+  }, []);
 
-    setSettings(newSettings);
+  const updateSettings = async (updatedSettings) => {
+    try {
+      setError("");
 
-    return newSettings;
+      const newSettings = await saveSettings(updatedSettings);
+
+      setSettings(newSettings);
+
+      return newSettings;
+    } catch (error) {
+      console.error("Failed to update settings:", error);
+
+      setError(error.message || "Failed to update settings.");
+
+      throw error;
+    }
   };
 
-  const resetAllSettings = () => {
-    const defaultSettings = resetSettings();
+  const resetAllSettings = async () => {
+    try {
+      setError("");
 
-    setSettings(defaultSettings);
+      const defaultSettings = await resetSettings();
 
-    return defaultSettings;
+      setSettings(defaultSettings);
+
+      return defaultSettings;
+    } catch (error) {
+      console.error("Failed to reset settings:", error);
+
+      setError(error.message || "Failed to reset settings.");
+
+      throw error;
+    }
   };
 
   return (
@@ -42,6 +77,7 @@ export const SettingsProvider = ({ children }) => {
       value={{
         settings,
         loading,
+        error,
         updateSettings,
         resetAllSettings,
       }}
@@ -55,7 +91,9 @@ export const useSettingsContext = () => {
   const context = useContext(SettingsContext);
 
   if (!context) {
-    throw new Error("useSettingsContext must be used inside SettingsProvider.");
+    throw new Error(
+      "useSettingsContext must be used inside SettingsProvider.",
+    );
   }
 
   return context;

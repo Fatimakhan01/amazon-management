@@ -5,15 +5,16 @@ import {
 
 import Card from "../Card";
 
-import {
-  useProductContext,
-} from "../../context/ProductContext";
-
-const LOW_STOCK_THRESHOLD = 10;
+import { useSettingsContext } from "../../context/SettingsContext";
+import { useProductContext } from "../../context/ProductContext";
 
 const LowStockList = () => {
-  const { products } =
-    useProductContext();
+  const { settings } = useSettingsContext();
+  const { products } = useProductContext();
+
+  const LOW_STOCK_THRESHOLD = Number(
+    settings?.lowStockThreshold || 10,
+  );
 
   const lowStockProducts = products
     .filter((product) => {
@@ -52,8 +53,7 @@ const LowStockList = () => {
       </div>
 
       <div className="divide-y divide-gray-100">
-        {lowStockProducts.length ===
-        0 ? (
+        {lowStockProducts.length === 0 ? (
           <div className="px-5 py-10 text-center">
             <FiPackage
               size={28}
@@ -65,54 +65,48 @@ const LowStockList = () => {
             </p>
 
             <p className="mt-1 text-xs text-gray-400">
-              Your inventory levels look
-              good.
+              Your inventory levels look good.
             </p>
           </div>
         ) : (
-          lowStockProducts.map(
-            (product) => {
-              const quantity = Number(
-                product.quantity || 0
-              );
+          lowStockProducts.map((product) => {
+            const quantity = Number(
+              product.quantity || 0
+            );
 
-              return (
-                <div
-                  key={product.id}
-                  className="flex items-center justify-between gap-4 px-5 py-4"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500">
-                      <FiPackage
-                        size={16}
-                      />
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-gray-900">
-                        {product.name}
-                      </p>
-
-                      <p className="mt-0.5 text-xs text-gray-400">
-                        SKU:{" "}
-                        {product.sku}
-                      </p>
-                    </div>
+            return (
+              <div
+                key={product.id}
+                className="flex items-center justify-between gap-4 px-5 py-4"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500">
+                    <FiPackage size={16} />
                   </div>
 
-                  <div className="shrink-0 text-right">
-                    <p className="text-sm font-semibold text-orange-600">
-                      {quantity}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-gray-900">
+                      {product.name}
                     </p>
 
-                    <p className="text-xs text-gray-400">
-                      left
+                    <p className="mt-0.5 text-xs text-gray-400">
+                      SKU: {product.sku}
                     </p>
                   </div>
                 </div>
-              );
-            }
-          )
+
+                <div className="shrink-0 text-right">
+                  <p className="text-sm font-semibold text-orange-600">
+                    {quantity}
+                  </p>
+
+                  <p className="text-xs text-gray-400">
+                    left
+                  </p>
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
     </Card>

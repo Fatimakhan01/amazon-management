@@ -10,6 +10,7 @@ import stockOutRoutes from "./routes/stockOutRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import wastageRoutes from "./routes/wastageRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
+import settingsRoutes from "./routes/settingsRoutes.js";
 
 const app = express();
 
@@ -31,5 +32,6 @@ app.use("/api/stock-outs", stockOutRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/wastages", wastageRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/settings", settingsRoutes);
 
 export default app;
