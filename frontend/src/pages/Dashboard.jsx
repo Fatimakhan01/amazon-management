@@ -15,75 +15,79 @@ import OrderStatusChart from "../components/dashboard/OrderStatusChart";
 import RecentOrders from "../components/dashboard/RecentOrders";
 import RevenueChart from "../components/dashboard/RevenueChart";
 
-import {
-  useProductContext,
-} from "../context/ProductContext";
+import { useProductContext } from "../context/ProductContext";
+import { useOrderContext } from "../context/OrderContext";
 
 const Dashboard = () => {
-  const { products } =
-    useProductContext();
+  const { products } = useProductContext();
+  const { orders } = useOrderContext();
 
-  const totalProducts =
-    products.length;
+  const totalProducts = products.length;
 
   const totalStock = products.reduce(
     (total, product) =>
-      total +
-      Number(product.quantity || 0),
+      total + Number(product.quantity || 0),
     0
   );
 
-  const lowStock = products.filter(
-    (product) => {
-      const quantity = Number(
-        product.quantity || 0
-      );
+  const lowStock = products.filter((product) => {
+    const quantity = Number(product.quantity || 0);
 
-      return (
-        quantity > 0 &&
-        quantity < 10
-      );
-    }
+    return quantity > 0 && quantity < 10;
+  }).length;
+
+  const outOfStock = products.filter(
+    (product) =>
+      Number(product.quantity || 0) === 0
   ).length;
 
-  const outOfStock =
-    products.filter(
-      (product) =>
-        Number(product.quantity || 0) ===
-        0
-    ).length;
+  const totalOrders = orders.length;
+
+  const totalRevenue = orders.reduce(
+    (total, order) =>
+      total + Number(order.revenue || 0),
+    0
+  );
+
+  const totalProfit = orders.reduce(
+    (total, order) =>
+      total + Number(order.profit || 0),
+    0
+  );
+
+  const pendingOrders = orders.filter(
+  (order) =>
+    String(order.status || "").toLowerCase() === "pending"
+).length;
 
   const stats = [
     {
       title: "Total Products",
-      value:
-        totalProducts.toLocaleString(),
+      value: totalProducts.toLocaleString(),
       icon: FiPackage,
-      description:
-        "Products in inventory",
+      description: "Products in inventory",
     },
     {
       title: "Total Stock",
-      value:
-        totalStock.toLocaleString(),
+      value: totalStock.toLocaleString(),
       icon: FiLayers,
       description: "Units available",
     },
     {
       title: "Orders",
-      value: "0",
+      value: totalOrders.toLocaleString(),
       icon: FiShoppingCart,
       description: "Orders placed",
     },
     {
       title: "Revenue",
-      value: "Rs. 0",
+      value: `Rs. ${totalRevenue.toLocaleString()}`,
       icon: FiDollarSign,
       description: "Total revenue",
     },
     {
       title: "Profit",
-      value: "Rs. 0",
+      value: `Rs. ${totalProfit.toLocaleString()}`,
       icon: FiTrendingUp,
       description: "Total profit",
     },
@@ -91,23 +95,19 @@ const Dashboard = () => {
       title: "Low Stock",
       value: lowStock.toLocaleString(),
       icon: FiAlertTriangle,
-      description:
-        "Below stock threshold",
+      description: "Below stock threshold",
     },
     {
       title: "Out of Stock",
-      value:
-        outOfStock.toLocaleString(),
+      value: outOfStock.toLocaleString(),
       icon: FiTrash2,
-      description:
-        "Products unavailable",
+      description: "Products unavailable",
     },
     {
       title: "Pending Orders",
-      value: "0",
+      value: pendingOrders.toLocaleString(),
       icon: FiClock,
-      description:
-        "Orders awaiting action",
+      description: "Orders awaiting action",
     },
   ];
 
@@ -119,8 +119,7 @@ const Dashboard = () => {
         </h1>
 
         <p className="mt-1 text-sm text-gray-500">
-          Overview of your warehouse
-          operations.
+          Overview of your warehouse operations.
         </p>
       </div>
 
@@ -134,13 +133,13 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <RevenueChart />
-        <OrderStatusChart />
+        <RevenueChart orders={orders} />
+        <OrderStatusChart orders={orders} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <LowStockList />
-        <RecentOrders />
+        <RecentOrders orders={orders} />
       </div>
     </div>
   );

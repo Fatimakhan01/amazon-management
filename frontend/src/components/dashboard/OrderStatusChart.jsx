@@ -9,25 +9,6 @@ import {
 
 import Card from "../Card";
 
-const orderStatusData = [
-  {
-    name: "Completed",
-    value: 180,
-  },
-  {
-    name: "Pending",
-    value: 42,
-  },
-  {
-    name: "Processing",
-    value: 64,
-  },
-  {
-    name: "Cancelled",
-    value: 40,
-  },
-];
-
 const STATUS_COLORS = [
   "#131921",
   "#FF9900",
@@ -35,7 +16,34 @@ const STATUS_COLORS = [
   "#EF4444",
 ];
 
-const OrderStatusChart = () => {
+const OrderStatusChart = ({ orders = [] }) => {
+  const orderStatusData = [
+    {
+      name: "Completed",
+      value: orders.filter(
+        (order) => String(order.status || "").toLowerCase() === "completed"
+      ).length,
+    },
+    {
+      name: "Pending",
+      value: orders.filter(
+        (order) => String(order.status || "").toLowerCase() === "pending"
+      ).length,
+    },
+    {
+      name: "Processing",
+      value: orders.filter(
+        (order) => String(order.status || "").toLowerCase() === "processing"
+      ).length,
+    },
+    {
+      name: "Cancelled",
+      value: orders.filter(
+        (order) => String(order.status || "").toLowerCase() === "cancelled"
+      ).length,
+    },
+  ];
+
   return (
     <Card className="h-full">
       <div className="mb-6">
@@ -64,12 +72,14 @@ const OrderStatusChart = () => {
               outerRadius={105}
               paddingAngle={3}
             >
-              {orderStatusData.map((entry, index) => (
-                <Cell
-                  key={`cell-${entry.name}`}
-                  fill={STATUS_COLORS[index]}
-                />
-              ))}
+              {orderStatusData.map(
+                (entry, index) => (
+                  <Cell
+                    key={`cell-${entry.name}`}
+                    fill={STATUS_COLORS[index]}
+                  />
+                )
+              )}
             </Pie>
 
             <Tooltip
