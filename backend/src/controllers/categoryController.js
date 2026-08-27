@@ -191,6 +191,23 @@ export const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
 
+    const productsResult = await pool.query(
+      `
+        SELECT COUNT(*)::int AS count
+        FROM products
+        WHERE category_id = $1
+      `,
+      [id],
+    );
+
+    const productCount = productsResult.rows[0].count;
+
+    if (productCount > 0) {
+      return res.status(409).json({
+        message: `Cannot delete this category because it is assigned to ${productCount} product${productCount > 1 ? "s" : ""}.`,
+      });
+    }
+
     const result = await pool.query(
       `
         DELETE FROM categories
@@ -207,8 +224,7 @@ export const deleteCategory = async (req, res) => {
     }
 
     res.status(200).json({
-      message:
-        "Category deleted successfully.",
+      message: "Category deleted successfully.",
     });
   } catch (error) {
     console.error(

@@ -17,7 +17,7 @@ const getProductStatus = (quantity) => {
 export const getProducts = async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT 
+      SELECT
         p.id,
         p.name,
         p.sku,
@@ -136,6 +136,23 @@ export const createProduct = async (req, res) => {
       return res.status(409).json({
         message: "A product with this SKU already exists.",
       });
+    }
+
+    if (normalizedBarcode) {
+      const existingBarcode = await pool.query(
+        `
+          SELECT id
+          FROM products
+          WHERE barcode = $1
+        `,
+        [normalizedBarcode],
+      );
+
+      if (existingBarcode.rows.length > 0) {
+        return res.status(409).json({
+          message: "A product with this barcode already exists.",
+        });
+      }
     }
 
     const status = getProductStatus(numericQuantity);
@@ -280,6 +297,24 @@ export const updateProduct = async (req, res) => {
       return res.status(409).json({
         message: "A product with this SKU already exists.",
       });
+    }
+
+    if (normalizedBarcode) {
+      const duplicateBarcode = await pool.query(
+        `
+          SELECT id
+          FROM products
+          WHERE barcode = $1
+            AND id != $2
+        `,
+        [normalizedBarcode, id],
+      );
+
+      if (duplicateBarcode.rows.length > 0) {
+        return res.status(409).json({
+          message: "A product with this barcode already exists.",
+        });
+      }
     }
 
     const status = getProductStatus(numericQuantity);

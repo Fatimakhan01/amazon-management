@@ -187,6 +187,23 @@ export const deleteSupplier = async (req, res) => {
   try {
     const { id } = req.params;
 
+    const productsResult = await pool.query(
+      `
+        SELECT COUNT(*)::int AS count
+        FROM products
+        WHERE supplier_id = $1
+      `,
+      [id],
+    );
+
+    const productCount = productsResult.rows[0].count;
+
+    if (productCount > 0) {
+      return res.status(409).json({
+        message: `Cannot delete this supplier because it is assigned to ${productCount} product${productCount > 1 ? "s" : ""}.`,
+      });
+    }
+
     const result = await pool.query(
       `
         DELETE FROM suppliers
@@ -206,7 +223,10 @@ export const deleteSupplier = async (req, res) => {
       message: "Supplier deleted successfully.",
     });
   } catch (error) {
-    console.error("Delete supplier error:", error.message);
+    console.error(
+      "Delete supplier error:",
+      error.message,
+    );
 
     res.status(500).json({
       message: "Failed to delete supplier.",

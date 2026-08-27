@@ -78,6 +78,7 @@ const Suppliers = () => {
 
   const handleDeleteSupplier = (supplier) => {
     setSelectedSupplier(supplier);
+    setError("");
     setIsDeleteModalOpen(true);
   };
 
@@ -91,6 +92,7 @@ const Suppliers = () => {
   const closeDeleteModal = () => {
     setIsDeleteModalOpen(false);
     setSelectedSupplier(null);
+    setError("");
   };
 
   const handleSubmitSupplier = async (formData) => {
@@ -98,7 +100,10 @@ const Suppliers = () => {
       setError("");
 
       if (isEditing && selectedSupplier) {
-        await editSupplier(selectedSupplier.id, formData);
+        await editSupplier(
+          selectedSupplier.id,
+          formData,
+        );
       } else {
         await addSupplier(formData);
       }
@@ -106,29 +111,31 @@ const Suppliers = () => {
       closeSupplierModal();
     } catch (error) {
       setError(
-        error.message || "Failed to save supplier."
+        error.message || "Failed to save supplier.",
       );
     }
   };
 
   const handleConfirmDelete = async () => {
-  if (!selectedSupplier) {
-    return;
-  }
+    if (!selectedSupplier) {
+      return;
+    }
 
-  try {
-    await removeSupplier(
-      selectedSupplier.id,
-    );
+    try {
+      setError("");
 
-    handleCloseDeleteModal();
-  } catch (error) {
-    setError(
-      error.message ||
-        "Failed to delete supplier.",
-    );
-  }
-};
+      await removeSupplier(
+        selectedSupplier.id,
+      );
+
+      closeDeleteModal();
+    } catch (error) {
+      setError(
+        error.message ||
+          "Failed to delete supplier.",
+      );
+    }
+  };
 
   const handleClearFilters = () => {
     setSearchTerm("");
@@ -143,7 +150,9 @@ const Suppliers = () => {
         </div>
       )}
 
-      <SupplierHeader onAddSupplier={handleAddSupplier} />
+      <SupplierHeader
+        onAddSupplier={handleAddSupplier}
+      />
 
       <SupplierStats />
 
@@ -166,7 +175,11 @@ const Suppliers = () => {
       <Modal
         isOpen={isSupplierModalOpen}
         onClose={closeSupplierModal}
-        title={isEditing ? "Edit Supplier" : "Add Supplier"}
+        title={
+          isEditing
+            ? "Edit Supplier"
+            : "Add Supplier"
+        }
         description={
           isEditing
             ? "Update supplier information."
