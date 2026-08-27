@@ -1,95 +1,104 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import {getProducts,createProduct,updateProduct,deleteProduct,} from "../services/productService";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  getProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+} from "../services/productService";
+
 const ProductContext = createContext(null);
 
-export const ProductProvider = ({ children }) => {
-  const [products, setProducts] = useState([]);
+export const ProductProvider = ({
+  children,
+}) => {
+  const [products, setProducts] =
+    useState([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const data = await getProducts();
+
+      setProducts(data);
+    } catch (error) {
+      setError(
+        error.message ||
+          "Failed to load products.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const storedProducts = getProducts();
-
-    setProducts(storedProducts);
-    setLoading(false);
+    loadProducts();
   }, []);
 
-  const addProduct = (productData) => {
-    const newProduct = createProduct(productData);
+  const addProduct = async (
+    productData,
+  ) => {
+    const newProduct =
+      await createProduct(productData);
 
-    setProducts((previousProducts) => [...previousProducts, newProduct]);
+    setProducts(
+      (previousProducts) => [
+        newProduct,
+        ...previousProducts,
+      ],
+    );
 
     return newProduct;
   };
 
-  const editProduct = (productId, productData) => {
-    const updatedProduct = updateProduct(productId, productData);
+  const editProduct = async (
+    productId,
+    productData,
+  ) => {
+    const updatedProduct =
+      await updateProduct(
+        productId,
+        productData,
+      );
 
-    setProducts((previousProducts) =>
-      previousProducts.map((product) =>
-        product.id === productId ? updatedProduct : product,
-      ),
+    setProducts(
+      (previousProducts) =>
+        previousProducts.map(
+          (product) =>
+            product.id === productId
+              ? updatedProduct
+              : product,
+        ),
     );
 
     return updatedProduct;
   };
 
-  const removeProduct = (productId) => {
-    const updatedProducts = deleteProduct(productId);
+  const removeProduct = async (
+    productId,
+  ) => {
+    await deleteProduct(productId);
 
-    setProducts(updatedProducts);
-  };
-
-  const increaseProductStock = (productId, quantity) => {
-    const product = products.find((item) => item.id === productId);
-
-    if (!product) {
-      throw new Error("Product not found.");
-    }
-
-    const stockQuantity = Number(quantity);
-
-    if (!Number.isFinite(stockQuantity) || stockQuantity <= 0) {
-      throw new Error("Stock quantity must be greater than zero.");
-    }
-
-    const currentQuantity = Number(product.quantity || 0);
-
-    const newQuantity = currentQuantity + stockQuantity;
-
-    return editProduct(productId, {
-      ...product,
-      quantity: newQuantity,
-    });
-  };
-
-  const decreaseProductStock = (productId, quantity) => {
-    const product = products.find((item) => item.id === productId);
-
-    if (!product) {
-      throw new Error("Product not found.");
-    }
-
-    const stockQuantity = Number(quantity);
-
-    if (!Number.isFinite(stockQuantity) || stockQuantity <= 0) {
-      throw new Error("Stock quantity must be greater than zero.");
-    }
-
-    const currentQuantity = Number(product.quantity || 0);
-
-    if (stockQuantity > currentQuantity) {
-      throw new Error(
-        `Insufficient stock. Available quantity is ${currentQuantity}.`,
-      );
-    }
-
-    const newQuantity = currentQuantity - stockQuantity;
-
-    return editProduct(productId, {
-      ...product,
-      quantity: newQuantity,
-    });
+    setProducts(
+      (previousProducts) =>
+        previousProducts.filter(
+          (product) =>
+            product.id !== productId,
+        ),
+    );
   };
 
   return (
@@ -97,11 +106,12 @@ export const ProductProvider = ({ children }) => {
       value={{
         products,
         loading,
+        error,
         addProduct,
         editProduct,
         removeProduct,
-        increaseProductStock,
-        decreaseProductStock,
+        reloadProducts:
+          loadProducts,
       }}
     >
       {children}
@@ -110,10 +120,13 @@ export const ProductProvider = ({ children }) => {
 };
 
 export const useProductContext = () => {
-  const context = useContext(ProductContext);
+  const context =
+    useContext(ProductContext);
 
   if (!context) {
-    throw new Error("useProductContext must be used inside ProductProvider.");
+    throw new Error(
+      "useProductContext must be used inside ProductProvider.",
+    );
   }
 
   return context;

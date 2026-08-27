@@ -1,7 +1,4 @@
-import {
-  useMemo,
-  useState,
-} from "react";
+import { useMemo, useState } from "react";
 
 import ProductHeader from "../components/products/ProductHeader";
 import ProductStats from "../components/products/ProductStats";
@@ -10,9 +7,7 @@ import ProductTable from "../components/products/ProductTable";
 import ProductForm from "../components/products/ProductForm";
 import Modal from "../components/Modal";
 
-import {
-  useProductContext,
-} from "../context/ProductContext";
+import { useProductContext } from "../context/ProductContext";
 
 const Products = () => {
   const {
@@ -22,20 +17,14 @@ const Products = () => {
     removeProduct,
   } = useProductContext();
 
-  const [
-    isProductModalOpen,
-    setIsProductModalOpen,
-  ] = useState(false);
+  const [isProductModalOpen, setIsProductModalOpen] =
+    useState(false);
 
-  const [
-    isDeleteModalOpen,
-    setIsDeleteModalOpen,
-  ] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] =
+    useState(false);
 
-  const [
-    selectedProduct,
-    setSelectedProduct,
-  ] = useState(null);
+  const [selectedProduct, setSelectedProduct] =
+    useState(null);
 
   const [isEditing, setIsEditing] =
     useState(false);
@@ -43,15 +32,13 @@ const Products = () => {
   const [searchTerm, setSearchTerm] =
     useState("");
 
-  const [
-    categoryFilter,
-    setCategoryFilter,
-  ] = useState("");
+  const [categoryFilter, setCategoryFilter] =
+    useState("");
 
-  const [
-    statusFilter,
-    setStatusFilter,
-  ] = useState("");
+  const [statusFilter, setStatusFilter] =
+    useState("");
+
+  const [error, setError] = useState("");
 
   const filteredProducts = useMemo(() => {
     const normalizedSearch =
@@ -72,8 +59,7 @@ const Products = () => {
 
       const matchesCategory =
         !categoryFilter ||
-        product.category ===
-          categoryFilter;
+        product.category === categoryFilter;
 
       const matchesStatus =
         !statusFilter ||
@@ -106,17 +92,20 @@ const Products = () => {
   const handleAddProduct = () => {
     setSelectedProduct(null);
     setIsEditing(false);
+    setError("");
     setIsProductModalOpen(true);
   };
 
   const handleEditProduct = (product) => {
     setSelectedProduct(product);
     setIsEditing(true);
+    setError("");
     setIsProductModalOpen(true);
   };
 
   const handleDeleteProduct = (product) => {
     setSelectedProduct(product);
+    setError("");
     setIsDeleteModalOpen(true);
   };
 
@@ -124,45 +113,66 @@ const Products = () => {
     setIsProductModalOpen(false);
     setSelectedProduct(null);
     setIsEditing(false);
+    setError("");
   };
 
   const handleCloseDeleteModal = () => {
     setIsDeleteModalOpen(false);
     setSelectedProduct(null);
+    setError("");
   };
 
-  const handleSubmitProduct = (
-    formData
-  ) => {
-    if (
-      isEditing &&
-      selectedProduct
-    ) {
-      editProduct(
-        selectedProduct.id,
-        formData
+  const handleSubmitProduct = async (formData) => {
+    try {
+      setError("");
+
+      if (isEditing && selectedProduct) {
+        await editProduct(
+          selectedProduct.id,
+          formData
+        );
+      } else {
+        await addProduct(formData);
+      }
+
+      handleCloseProductModal();
+    } catch (error) {
+      setError(
+        error.message ||
+          "Failed to save product."
       );
-    } else {
-      addProduct(formData);
     }
-
-    handleCloseProductModal();
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!selectedProduct) {
       return;
     }
 
-    removeProduct(
-      selectedProduct.id
-    );
+    try {
+      setError("");
 
-    handleCloseDeleteModal();
+      await removeProduct(
+        selectedProduct.id
+      );
+
+      handleCloseDeleteModal();
+    } catch (error) {
+      setError(
+        error.message ||
+          "Failed to delete product."
+      );
+    }
   };
 
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          {error}
+        </div>
+      )}
+
       <ProductHeader
         onAddProduct={handleAddProduct}
       />
@@ -213,8 +223,7 @@ const Products = () => {
       >
         <ProductForm
           initialValues={
-            selectedProduct ||
-            undefined
+            selectedProduct || undefined
           }
           onSubmit={
             handleSubmitProduct

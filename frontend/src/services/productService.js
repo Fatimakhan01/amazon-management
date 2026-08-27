@@ -1,113 +1,75 @@
-import { getProductStatus } from "../utils/productUtils";
+const API_URL = import.meta.env.VITE_API_URL;
 
-const PRODUCTS_KEY = "warehouse_products";
+const handleResponse = async (response) => {
+  const data = await response.json();
 
-export const getProducts = () => {
-  const storedProducts =
-    localStorage.getItem(PRODUCTS_KEY);
-
-  if (!storedProducts) {
-    return [];
-  }
-
-  try {
-    return JSON.parse(storedProducts);
-  } catch (error) {
-    console.error(
-      "Failed to parse products:",
-      error
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Something went wrong.",
     );
-
-    return [];
   }
+
+  return data;
 };
 
-const saveProducts = (products) => {
-  localStorage.setItem(
-    PRODUCTS_KEY,
-    JSON.stringify(products)
+export const getProducts = async () => {
+  const response = await fetch(
+    `${API_URL}/products`,
   );
+
+  const data = await handleResponse(response);
+
+  return data.products;
 };
 
-export const createProduct = (
-  productData
+export const createProduct = async (
+  productData,
 ) => {
-  const products = getProducts();
-
-  const quantity = Number(
-    productData.quantity || 0
+  const response = await fetch(
+    `${API_URL}/products`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(productData),
+    },
   );
 
-  const newProduct = {
-    ...productData,
-    id: crypto.randomUUID(),
-    quantity,
-    costPrice: Number(
-      productData.costPrice || 0
-    ),
-    sellingPrice: Number(
-      productData.sellingPrice || 0
-    ),
-    status: getProductStatus(quantity),
-  };
+  const data = await handleResponse(response);
 
-  const updatedProducts = [
-    ...products,
-    newProduct,
-  ];
-
-  saveProducts(updatedProducts);
-
-  return newProduct;
+  return data.product;
 };
 
-export const updateProduct = (
+export const updateProduct = async (
   productId,
-  productData
+  productData,
 ) => {
-  const products = getProducts();
-
-  const quantity = Number(
-    productData.quantity || 0
+  const response = await fetch(
+    `${API_URL}/products/${productId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(productData),
+    },
   );
 
-  const updatedProduct = {
-    ...productData,
-    id: productId,
-    quantity,
-    costPrice: Number(
-      productData.costPrice || 0
-    ),
-    sellingPrice: Number(
-      productData.sellingPrice || 0
-    ),
-    status: getProductStatus(quantity),
-  };
+  const data = await handleResponse(response);
 
-  const updatedProducts =
-    products.map((product) =>
-      product.id === productId
-        ? updatedProduct
-        : product
-    );
-
-  saveProducts(updatedProducts);
-
-  return updatedProduct;
+  return data.product;
 };
 
-export const deleteProduct = (
-  productId
+export const deleteProduct = async (
+  productId,
 ) => {
-  const products = getProducts();
+  const response = await fetch(
+    `${API_URL}/products/${productId}`,
+    {
+      method: "DELETE",
+    },
+  );
 
-  const updatedProducts =
-    products.filter(
-      (product) =>
-        product.id !== productId
-    );
-
-  saveProducts(updatedProducts);
-
-  return updatedProducts;
+  return handleResponse(response);
 };
